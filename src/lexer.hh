@@ -24,6 +24,8 @@ private:
 	void handleAtom(char c);
 	void handleStringLit(char c);
 
+	char nextChar();
+
 	std::shared_ptr<Token> tok_;
 	std::istream& stream_;
 	States state_;

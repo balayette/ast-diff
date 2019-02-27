@@ -2,9 +2,27 @@
 #include <iostream>
 #include <string>
 
+#define MAKE_TOK(Type) std::make_shared<Token>(Type, line_, pos_);
+
 Lexer::Lexer(std::istream& stream)
     : stream_(stream), state_(START), rollback_(false), pos_(0), line_(0) {
 	Eat();
+}
+
+char Lexer::nextChar()
+{
+	char c;
+	stream_.get(c);
+	last_char_ = c;
+	if (c == '\n')
+	{
+		line_++;
+		pos_ = 0;
+	}
+	else
+		pos_++;
+
+	return c;
 }
 
 std::shared_ptr<Token> Lexer::Peek() {
@@ -21,13 +39,7 @@ void Lexer::Eat() {
 			rollback_ = false;
 			c = last_char_;
 		} else {
-			stream_.get(c);
-			last_char_ = c;
-			if (c == '\n') {
-				line_++;
-				pos_ = 0;
-			} else
-				pos_++;
+			c = nextChar();
 		}
 
 		switch (state_) {
@@ -49,20 +61,18 @@ void Lexer::handleStart(char c) {
 	switch (c) {
 		case '(':
 			state_ = START;
-			tok_ = std::make_shared<Token>(Token::LPAREN);
+			tok_ = MAKE_TOK(Token::LPAREN);
 			break;
 		case ')':
 			state_ = START;
-			tok_ = std::make_shared<Token>(Token::RPAREN);
+			tok_ = MAKE_TOK(Token::RPAREN);
 			break;
 		case '"':
 			state_ = STRING_LIT;
 			break;
 		case ' ':
 		case '\n':
-			stream_.get(c);
-			last_char_ = c;
-			handleStart(c);
+			handleStart(nextChar());
 			break;
 		case EOF:
 			state_ = START;
@@ -78,7 +88,7 @@ void Lexer::handleAtom(char c) {
 	std::string str("");
 	str += c;
 
-	while(stream_.get(c))
+	while((c = nextChar()) != EOF)
 	{
 		switch (c) {
 			case ' ':
@@ -86,7 +96,7 @@ void Lexer::handleAtom(char c) {
 			case ')':
 			case '\n':
 				state_ = START;
-				tok_ = std::make_shared<Token>(Token::ATOM);
+				tok_ = MAKE_TOK(Token::ATOM);
 				tok_->SetString(str);
 				if (c == '(' || c == ')') {
 					rollback_ = true;
@@ -104,18 +114,17 @@ void Lexer::handleStringLit(char c) {
 	std::string str("\"");
 	str += c;
 
-	while (stream_.get(c))
+	while ((c = nextChar()) != EOF)
 	{
 		switch (c) {
 			case '"':
 				str += '"';
 				state_ = START;
-				tok_ =
-				    std::make_shared<Token>(Token::ATOM);
+				tok_ = MAKE_TOK(Token::ATOM);
 				tok_->SetString(str);
 				return;
 			case '\\':
-				stream_.get(c);
+				c = nextChar();
 				if (c == EOF) {
 					std::cerr << "Unexpected EOF at line "
 						  << line_ << " char " << pos_
