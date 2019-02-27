@@ -5,7 +5,7 @@
 
 class Token {
        public:
-	enum TokenType { ATOM, LPAREN, RPAREN, STRING_LIT };
+	enum TokenType { ATOM, LPAREN, RPAREN };
 
 	Token(TokenType type);
 

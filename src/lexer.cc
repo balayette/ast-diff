@@ -111,7 +111,7 @@ void Lexer::handleStringLit(char c) {
 				str += '"';
 				state_ = START;
 				tok_ =
-				    std::make_shared<Token>(Token::STRING_LIT);
+				    std::make_shared<Token>(Token::ATOM);
 				tok_->SetString(str);
 				return;
 			case '\\':
@@ -122,7 +122,8 @@ void Lexer::handleStringLit(char c) {
 						  << '\n';
 					std::exit(1);
 				}
-				// Fallthrough ok
+				str += c;
+				break;
 			default:
 				str += c;
 				break;

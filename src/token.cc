@@ -20,9 +20,6 @@ std::ostream& operator<<(std::ostream& stream, const Token& tok) {
 		case Token::TokenType::RPAREN:
 			stream << "RPAREN";
 			break;
-		case Token::TokenType::STRING_LIT:
-			stream << "STRING_LIT(" << tok.str_ << ")";
-			break;
 	}
 
 	return stream;
