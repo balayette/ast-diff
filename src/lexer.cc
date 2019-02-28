@@ -71,6 +71,7 @@ void Lexer::handleStart(char c) {
 			state_ = STRING_LIT;
 			break;
 		case ' ':
+		case '\t':
 		case '\n':
 			handleStart(nextChar());
 			break;
