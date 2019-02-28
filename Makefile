@@ -8,6 +8,7 @@ SRC = \
 	src/token.cc \
 	src/parser.cc \
 	src/tree.cc \
+	src/symbol.cc \
 
 OBJ = $(SRC:.cc=.o)
 
