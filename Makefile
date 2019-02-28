@@ -6,6 +6,8 @@ SRC = \
 	src/lexer.cc \
 	src/ast-diffing.cc \
 	src/token.cc \
+	src/parser.cc \
+	src/tree.cc \
 
 OBJ = $(SRC:.cc=.o)
 

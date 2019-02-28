@@ -3,20 +3,21 @@
 #include <fstream>
 #include <string>
 #include "lexer.hh"
+#include "parser.hh"
 
 int main(void)
 {
-	std::string s("(ok) (ok) (((ok \"ok\\\"ok\" aa) b) c)");
+	std::string s("(Nicolas\n\t(a \"aa\" a) (a (a (lo (a) l))))");
 
 	std::istringstream f(s);
 
 	Lexer l(f);
 
-	while (std::shared_ptr<Token> t = l.Peek())
-	{
-		std::cout << *t << '\n';
-		l.Eat();
-	}
+	Parser p(l);
+
+	auto ret = p.Parse();
+
+	ret->Print(std::cout);
 
 	return 0;
 }
