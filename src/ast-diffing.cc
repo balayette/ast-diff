@@ -16,8 +16,9 @@ int main(void)
 	Parser p(l);
 
 	auto ret = p.Parse();
+	ret->ComputeHeightDepth();
 
-	ret->Print(std::cout);
+	ret->PrettyPrint(std::cout);
 
 	return 0;
 }

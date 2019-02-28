@@ -9,8 +9,8 @@ std::string& Token::GetString() { return str_; }
 
 Token::TokenType Token::GetType() { return type_; }
 
-int Token::GetLine() { return line_; };
-int Token::GetPos() { return pos_; };
+int Token::GetLine() { return line_; }
+int Token::GetPos() { return pos_; }
 
 std::ostream& operator<<(std::ostream& stream, const Token& tok) {
 	switch (tok.type_) {
