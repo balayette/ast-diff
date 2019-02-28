@@ -1,13 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <memory>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
-class Tree
-{
-public:
+class Tree {
+       public:
 	Tree();
 	Tree(std::string& value, Tree* parent);
 
@@ -19,8 +18,20 @@ public:
 
 	void SetValue(std::string& value);
 	std::string& GetValue();
-private:
+
+	void SetHeight(int height);
+	int GetHeight();
+	int ComputeHeightDepth();
+
+	std::ostream& PrettyPrint(std::ostream& stream);
+
+       private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
 	Tree* parent_;
+
+	int height_;
+	int depth_;
+
+	int computeHeightDepth(int depth);
 };
