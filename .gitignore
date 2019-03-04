@@ -1,0 +1,8 @@
+*.pdf
+*.o
+*.d
+src/ast-diffing
+ast-diffing
+tags
+*.png
+*.dot
