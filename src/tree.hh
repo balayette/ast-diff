@@ -26,6 +26,12 @@ class Tree {
 	std::ostream& PrettyPrint(std::ostream& stream);
 	std::ostream& DumpDot(std::ostream& stream);
 
+	template <typename Func>
+	void PreorderTraversal(Func f);
+
+	template <typename Func>
+	void PostorderTraversal(Func f);
+
        private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
@@ -40,3 +46,5 @@ class Tree {
 	int computeHeightDepth(int depth);
 	void dumpDot(std::ostream& stream);
 };
+
+#include "tree.hxx"
