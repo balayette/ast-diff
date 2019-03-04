@@ -20,5 +20,8 @@ int main(void)
 
 	ret->PrettyPrint(std::cout);
 
+	std::ofstream output("out.dot");
+	ret->DumpDot(output);
+
 	return 0;
 }

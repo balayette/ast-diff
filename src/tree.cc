@@ -1,9 +1,11 @@
 #include "tree.hh"
 
-Tree::Tree() : value_(""), parent_(nullptr) {}
+Tree::Tree() : value_(""), parent_(nullptr) { idx_ = node_count_++; }
 
 Tree::Tree(std::string& value, Tree* parent)
-    : value_(value), parent_(parent), height_(1), depth_(1) {}
+    : value_(value), parent_(parent), height_(1), depth_(1) {
+	idx_ = node_count_++;
+}
 
 void Tree::AddChild(std::shared_ptr<Tree>& tree) {
 	tree->parent_ = this;
@@ -21,21 +23,17 @@ std::ostream& Tree::Print(std::ostream& stream) {
 	return stream;
 }
 
-std::ostream& Tree::PrettyPrint(std::ostream& stream)
-{
-	for (int i = 0; i < depth_; i++)
-		stream << ' ';
+std::ostream& Tree::PrettyPrint(std::ostream& stream) {
+	for (int i = 0; i < depth_; i++) stream << ' ';
 
 	stream << '(' << value_;
-	if (children_.size() > 0)
-		stream << '\n';
+	if (children_.size() > 0) stream << '\n';
 
 	auto end = children_.end();
 	auto last = end - 1;
 	for (auto it = children_.begin(); it != end; it++) {
 		(*it)->PrettyPrint(stream);
-		if (it != last)
-			stream << '\n';
+		if (it != last) stream << '\n';
 	}
 
 	stream << ')';
@@ -55,8 +53,7 @@ void Tree::SetHeight(int height) { height_ = height; }
 
 int Tree::GetHeight() { return height_; }
 
-int Tree::computeHeightDepth(int depth)
-{
+int Tree::computeHeightDepth(int depth) {
 	depth_ = depth;
 	auto max = 0;
 	for (auto it = children_.begin(); it != children_.end(); it++) {
@@ -68,6 +65,23 @@ int Tree::computeHeightDepth(int depth)
 	return height_;
 }
 
-int Tree::ComputeHeightDepth() {
-	return computeHeightDepth(0);
+int Tree::ComputeHeightDepth() { return computeHeightDepth(0); }
+
+void Tree::dumpDot(std::ostream& stream) {
+	stream << '\t' << idx_ << " [label=<" << value_ << ">]\n";
+
+	for (auto& it : children_)
+		stream << '\t' << idx_ << " -> " << it->idx_ << '\n';
+
+	stream << '\n';
+
+	for (auto& it : children_) it->dumpDot(stream);
+}
+
+std::ostream& Tree::DumpDot(std::ostream& stream) {
+	stream << "digraph AST {\n";
+
+	dumpDot(stream);
+
+	return stream << "}\n";
 }

@@ -24,14 +24,19 @@ class Tree {
 	int ComputeHeightDepth();
 
 	std::ostream& PrettyPrint(std::ostream& stream);
+	std::ostream& DumpDot(std::ostream& stream);
 
        private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
 	Tree* parent_;
 
+	inline static int node_count_ = 0;
+
 	int height_;
 	int depth_;
+	int idx_;
 
 	int computeHeightDepth(int depth);
+	void dumpDot(std::ostream& stream);
 };
