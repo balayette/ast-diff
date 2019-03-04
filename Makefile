@@ -9,6 +9,7 @@ SRC = \
 	src/parser.cc \
 	src/tree.cc \
 	src/symbol.cc \
+	src/heap.cc \
 
 OBJ = $(SRC:.cc=.o)
 
