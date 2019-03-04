@@ -1,5 +1,7 @@
 #include "tree.hh"
 
+#include <algorithm>
+
 Tree::Tree()
     : value_("")
     , parent_(nullptr)
@@ -128,4 +130,33 @@ std::ostream& Tree::DumpDot(std::ostream& stream)
 	dumpDot(stream);
 
 	return stream << "}\n";
+}
+
+bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
+{
+	if (height_ != t->height_)
+		return false;
+
+	if (children_.size() != t->children_.size())
+		return false;
+
+	if (value_ != t->value_)
+		return false;
+
+	for (size_t i = 0; i < children_.size(); i++)
+	{
+		auto found = std::find_if(
+		    t->children_.begin(), t->children_.end(),
+		    [&](std::shared_ptr<Tree>& elem) {
+			    return elem->value_ == children_[i]->value_;
+		    });
+
+		if (found == children_.end())
+			return false;
+
+		if (!children_[i]->IsIsomorphic(*found))
+			return false;
+	}
+
+	return true;
 }

@@ -10,32 +10,29 @@
 int main(void)
 {
 	std::string s("(Nicolas\n\t(a \"c\" d) (e (f (g (h) i))))");
+	std::string s2("(Nicolas\n\t(e (f (g (i) h))) (a d \"c\"))");
 
 	std::istringstream f(s);
+	std::istringstream f2(s2);
 
 	Lexer l(f);
+	Lexer l2(f2);
 
 	Parser p(l);
+	Parser p2(l2);
 
 	auto ret = p.Parse();
 	ret->ComputeHeightDepth();
+	auto ret2 = p2.Parse();
+	ret2->ComputeHeightDepth();
 
 	ret->PrettyPrint(std::cout) << '\n';
+	ret2->PrettyPrint(std::cout) << '\n';
 
 	std::ofstream output("out.dot");
 	ret->DumpDot(output);
 
-	Heap h;
-	ret->PreorderTraversal(
-	    [&](Tree* t) { h.Push(std::make_shared<Tree>(*t)); });
-
-	while (h.size() > 0)
-	{
-		std::cout << "max: " << h.PeekMax() << '\n';
-		auto vec = h.Pop();
-		for (auto& it : vec)
-			std::cout << "  " << it->GetValue() << '\n';
-	}
+	std::cout << ret->IsIsomorphic(ret2) << '\n';
 
 	return 0;
 }

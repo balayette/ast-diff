@@ -33,6 +33,8 @@ class Tree
 	template <typename Func>
 	void PostorderTraversal(Func f);
 
+	bool IsIsomorphic(std::shared_ptr<Tree>& t);
+
     private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
