@@ -13,7 +13,6 @@ SRC = \
 OBJ = $(SRC:.cc=.o)
 
 DEP = $(OBJ:.o=.d)
--include $(DEP)
 
 all: CXXFLAGS += -O2
 all: ast-diffing
@@ -32,3 +31,5 @@ clean:
 	$(RM) $(OBJ) src/ast-diffing
 	$(RM) $(DEP)
 	$(RM) ast-diffing
+
+-include $(DEP)
