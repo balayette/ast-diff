@@ -1,7 +1,14 @@
+Outline:
+
+The GUMTREE algorithm computes mappings from similar nodes of one tree
+to another.
+The output of the algorithm is then fed into the algorithm of [2].
+
 Papers:
 
 Algorithm description:
-* Fine-grained and Accurate Source Code Differencing
+* [1] Fine-grained and Accurate Source Code Differencing
+* [2] Change Detection in Hierarchically Structured Information
 
 Use cases:
 * VulPecker: an automated vulnerability detection system based on code similarity analysis
