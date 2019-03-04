@@ -1,0 +1,14 @@
+Papers:
+
+Algorithm description:
+* Fine-grained and Accurate Source Code Differencing
+
+Use cases:
+* VulPecker: an automated vulnerability detection system based on code similarity analysis
+
+* Generating simpler AST edit scripts by considering copy-and-paste
+
+* Renaming and shifted code in structured merging: looking ahead for precision and performance
+
+Related:
+* A Feasibility Study of Using Automated Program Repair for Introductory Programming Assignments
