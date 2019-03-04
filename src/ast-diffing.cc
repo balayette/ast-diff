@@ -7,15 +7,29 @@
 #include "lexer.hh"
 #include "parser.hh"
 
-int main(void)
+int main(int argc, char *argv[])
 {
-	std::string s("(Nicolas\n\t(a \"c\" d) (e (f (g (h) i))))");
-	std::string s2("(Nicolas\n\t(e (f (g (i) h))) (a d \"c\"))");
+	if (argc < 3)
+	{
+		std::cerr << "usage: ast-diffing FILENAME1 FILENAME2\n";
+		std::exit(1);
+	}
 
-	std::istringstream f(s);
-	std::istringstream f2(s2);
+	std::ifstream f1(argv[1]);
+	if (!f1)
+	{
+		std::cerr << "Couldn't open file " << argv[1] << '\n';
+		std::exit(2);
+	}
 
-	Lexer l(f);
+	std::ifstream f2(argv[2]);
+	if (!f2)
+	{
+		std::cerr << "Couldn't open file " << argv[2] << '\n';
+		std::exit(2);
+	}
+
+	Lexer l(f1);
 	Lexer l2(f2);
 
 	Parser p(l);
@@ -29,10 +43,11 @@ int main(void)
 	ret->PrettyPrint(std::cout) << '\n';
 	ret2->PrettyPrint(std::cout) << '\n';
 
-	std::ofstream output("out.dot");
-	ret->DumpDot(output);
+	std::ofstream out1("out1.dot");
+	std::ofstream out2("out2.dot");
 
-	std::cout << ret->IsIsomorphic(ret2) << '\n';
+	ret->DumpDot(out1);
+	ret2->DumpDot(out2);
 
-	return 0;
+	return ret->IsIsomorphic(ret2);
 }

@@ -1,6 +1,7 @@
 #include "tree.hh"
 
 #include <algorithm>
+#include <regex>
 
 Tree::Tree()
     : value_("")
@@ -112,7 +113,9 @@ int Tree::ComputeHeightDepth()
 
 void Tree::dumpDot(std::ostream& stream)
 {
-	stream << '\t' << idx_ << " [label=<" << value_ << ">]\n";
+	std::string out(value_);
+	out = std::regex_replace(out, std::regex("\\\""), "\\\"");
+	stream << '\t' << idx_ << " [label=\"" << out << "\"]\n";
 
 	for (auto& it : children_)
 		stream << '\t' << idx_ << " -> " << it->idx_ << '\n';

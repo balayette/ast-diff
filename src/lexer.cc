@@ -17,7 +17,7 @@ Lexer::Lexer(std::istream& stream)
 
 char Lexer::nextChar()
 {
-	char c;
+	char c = 0;
 	stream_.get(c);
 	last_char_ = c;
 	if (c == '\n')
