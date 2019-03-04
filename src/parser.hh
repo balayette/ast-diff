@@ -1,16 +1,18 @@
 #pragma once
 
-#include "token.hh"
-#include "lexer.hh"
-#include "tree.hh"
 #include <memory>
+
+#include "lexer.hh"
+#include "token.hh"
+#include "tree.hh"
 
 class Parser
 {
-public:
+    public:
 	Parser(Lexer& lexer);
 
 	std::shared_ptr<Tree> Parse();
-private:
+
+    private:
 	Lexer& lexer_;
 };

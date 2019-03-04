@@ -2,11 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include "heap.hh"
 #include "lexer.hh"
 #include "parser.hh"
 
-int main(void) {
+int main(void)
+{
 	std::string s("(Nicolas\n\t(a \"c\" d) (e (f (g (h) i))))");
 
 	std::istringstream f(s);

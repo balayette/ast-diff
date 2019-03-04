@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
-class Tree {
-       public:
+class Tree
+{
+    public:
 	Tree();
 	Tree(std::string& value, Tree* parent);
 
@@ -32,7 +33,7 @@ class Tree {
 	template <typename Func>
 	void PostorderTraversal(Func f);
 
-       private:
+    private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
 	Tree* parent_;

@@ -1,19 +1,21 @@
 #pragma once
 
 #include <istream>
-#include <variant>
 #include <memory>
+#include <variant>
+
 #include "token.hh"
 
 class Lexer
 {
-public:
+    public:
 	explicit Lexer(std::istream& stream);
 
 	std::shared_ptr<Token> Peek();
 	void Eat();
-private:
-	enum States 
+
+    private:
+	enum States
 	{
 		START,
 		ATOM,

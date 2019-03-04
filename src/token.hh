@@ -3,9 +3,15 @@
 #include <ostream>
 #include <string>
 
-class Token {
-       public:
-	enum TokenType { ATOM, LPAREN, RPAREN };
+class Token
+{
+    public:
+	enum TokenType
+	{
+		ATOM,
+		LPAREN,
+		RPAREN
+	};
 
 	Token(TokenType type, int line, int pos);
 
@@ -17,10 +23,9 @@ class Token {
 	int GetLine();
 	int GetPos();
 
-	friend std::ostream& operator<<(std::ostream& stream,
-					const Token& tok);
+	friend std::ostream& operator<<(std::ostream& stream, const Token& tok);
 
-       private:
+    private:
 	std::string str_;
 	TokenType type_;
 	int line_;

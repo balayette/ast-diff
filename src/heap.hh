@@ -2,10 +2,12 @@
 
 #include <memory>
 #include <queue>
+
 #include "tree.hh"
 
-class Heap {
-       public:
+class Heap
+{
+    public:
 	Heap() = default;
 
 	void Push(std::shared_ptr<Tree> t);
@@ -15,10 +17,12 @@ class Heap {
 
 	int size();
 
-       private:
-	struct compare_tree {
+    private:
+	struct compare_tree
+	{
 		bool operator()(const std::shared_ptr<Tree>& t1,
-				const std::shared_ptr<Tree>& t2) {
+				const std::shared_ptr<Tree>& t2)
+		{
 			return t1->GetHeight() < t2->GetHeight();
 		}
 	};
