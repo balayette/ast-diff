@@ -50,4 +50,10 @@ class Tree
 	void dumpDot(std::ostream& stream);
 };
 
+template <typename Pred>
+std::shared_ptr<Tree> FindIf(std::shared_ptr<Tree> t, Pred f);
+
+template <typename Pred>
+std::vector<std::shared_ptr<Tree>> FindAll(std::shared_ptr<Tree>& t, Pred f);
+
 #include "tree.hxx"
