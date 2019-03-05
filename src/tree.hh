@@ -50,6 +50,8 @@ class Tree
 	void dumpDot(std::ostream& stream);
 };
 
+std::vector<std::shared_ptr<Tree>> GetDescendants(std::shared_ptr<Tree>& t);
+
 template <typename Pred>
 std::shared_ptr<Tree> FindIf(std::shared_ptr<Tree> t, Pred f);
 

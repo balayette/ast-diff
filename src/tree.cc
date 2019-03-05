@@ -163,3 +163,21 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 
 	return true;
 }
+
+void getDescendants(std::shared_ptr<Tree>& t, std::vector<std::shared_ptr<Tree>>& v)
+{
+
+	auto& children = t->GetChildren();
+	v.insert(v.end(), children.begin(), children.end());
+	for (auto& it: children)
+		getDescendants(it, v);
+}
+
+std::vector<std::shared_ptr<Tree>> GetDescendants(std::shared_ptr<Tree>& t)
+{
+	std::vector<std::shared_ptr<Tree>> v;
+
+	getDescendants(t, v);
+
+	return v;
+}
