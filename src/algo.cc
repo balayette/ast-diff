@@ -43,8 +43,14 @@ void addPairOfIsomorphicDescendants(GumtreeData& data,
 	auto desc2 = GetDescendants(t2);
 	foreach_pair(desc1.begin(), desc1.end(), desc2.begin(), desc2.end(),
 		     [&](std::shared_ptr<Tree>& a, std::shared_ptr<Tree>& b) {
+			     std::cout << a->GetValue() << " iso "
+				       << b->GetValue() << '?';
 			     if (a->IsIsomorphic(b))
+			     {
 				     data.Map.emplace_back(a, b);
+				     std::cout << " Yes.\n";
+			     } else
+				     std::cout << " No.\n";
 		     });
 }
 
@@ -66,9 +72,18 @@ void isomorphicPair(GumtreeData& data, std::shared_ptr<Tree>& t1,
 			 [&](std::shared_ptr<Tree>& tx) { return tx != t1; });
 
 	if (it1 != iso1.end() || it2 != iso2.end())
-		data.Candidates.emplace_back(t1, t2);
-	else
+	{
+		std::cout << "Multiple matches\n";
+		for (auto it = it1; it != iso1.end(); it++)
+			data.Candidates.emplace_back(t1, *it);
+		for (auto it = it2; it != iso2.end(); it++)
+			data.Candidates.emplace_back(*it, t2);
+	} else
+	{
+		std::cout << "Single match, cool\n";
+		data.Map.emplace_back(t1, t2);
 		addPairOfIsomorphicDescendants(data, t1, t2);
+	}
 }
 
 void doOpenT1(GumtreeData& data, std::shared_ptr<Tree>& t1)
@@ -110,10 +125,24 @@ void sameHeights(GumtreeData& data)
 	auto h1 = data.L1.Pop();
 	auto h2 = data.L2.Pop();
 
+	std::cout << "h1\n";
+	for (auto& it : h1)
+		std::cout << it->GetValue() << '\n';
+
+	std::cout << "h2\n";
+	for (auto& it : h2)
+		std::cout << it->GetValue() << '\n';
+
 	foreach_pair(h1.begin(), h1.end(), h2.begin(), h2.end(),
 		     [&](auto& t1, auto& t2) {
+			     std::cout << t1->GetValue() << " iso to "
+				       << t2->GetValue() << '?';
 			     if (!t1->IsIsomorphic(t2))
+			     {
+				     std::cout << " No.\n";
 				     return;
+			     }
+			     std::cout << " Yes.\n";
 			     isomorphicPair(data, t1, t2);
 		     });
 
@@ -141,12 +170,14 @@ Gumtree(std::shared_ptr<Tree> SourceTree, std::shared_ptr<Tree> DestTree)
 	data.SourceTree = SourceTree;
 	data.DestTree = DestTree;
 
-	data.MinHeight = 2;
+	data.MinHeight = 1;
 
 	data.L1.Push(SourceTree);
 	data.L2.Push(DestTree);
 
-	while (std::min(data.L1.PeekMax(), data.L2.PeekMax()) > data.MinHeight)
+	for (int min = std::min(data.L1.PeekMax(), data.L2.PeekMax());
+	     min != -1 && min > data.MinHeight;
+	     min = std::min(data.L1.PeekMax(), data.L2.PeekMax()))
 	{
 		if (data.L1.PeekMax() != data.L2.PeekMax())
 			differentHeights(data);
@@ -154,6 +185,7 @@ Gumtree(std::shared_ptr<Tree> SourceTree, std::shared_ptr<Tree> DestTree)
 			sameHeights(data);
 	}
 
+	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
 	std::sort(
 	    data.Candidates.begin(), data.Candidates.end(),
 	    [&](std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>& a,
