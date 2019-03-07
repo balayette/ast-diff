@@ -207,7 +207,7 @@ void DumpMapping(
 	for (auto p : v)
 		stream
 		    << p.first->idx_ << " -> " << p.second->idx_
-		    << " [fillcolor = blue] [color = blue] [style = dashed];\n";
+		    << " [fillcolor = blue] [color = blue] [style = dashed] [constraint = false];\n";
 
 	stream << "}\n";
 }
