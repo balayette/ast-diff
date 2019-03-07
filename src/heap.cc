@@ -8,7 +8,7 @@ void Heap::Push(std::shared_ptr<Tree> t)
 int Heap::PeekMax()
 {
 	if (heap_.size() == 0)
-		throw "PeekMax called on empty heap.";
+		return -1;
 	return heap_.top()->GetHeight();
 }
 
