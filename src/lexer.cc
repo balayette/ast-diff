@@ -153,6 +153,8 @@ void Lexer::handleStringLit(char c)
 					  << " char " << pos_ << '\n';
 				std::exit(1);
 			}
+			if (c != '"')
+				str += '\\';
 			str += c;
 			break;
 		default:
