@@ -3,11 +3,12 @@
 #include <sstream>
 #include <string>
 
+#include "algo.hh"
 #include "heap.hh"
 #include "lexer.hh"
 #include "parser.hh"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	if (argc < 3)
 	{
@@ -49,5 +50,11 @@ int main(int argc, char *argv[])
 	ret->DumpDot(out1);
 	ret2->DumpDot(out2);
 
-	return ret->IsIsomorphic(ret2);
+	auto mapping = Gumtree(ret, ret2);
+
+	for (auto& it : mapping)
+	{
+		std::cout << it.first->GetValue() << " mapped to "
+			  << it.second->GetValue() << '\n';
+	}
 }

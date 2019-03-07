@@ -10,17 +10,18 @@ SRC = \
 	src/tree.cc \
 	src/symbol.cc \
 	src/heap.cc \
+	src/algo.cc \
 
 OBJ = $(SRC:.cc=.o)
 
 DEP = $(OBJ:.o=.d)
 
-all: CXXFLAGS += -O2
+opti: CXXFLAGS += -O2
+opti: all
+
 all: ast-diffing
 
-debug: CXXFLAGS += -Og -fsanitize=address
-debug: LDFLAGS += -fsanitize=address
-debug: CPPFLAGS += -D_GLIBCXX_DEBUG
+debug: CXXFLAGS += -Og
 debug: all
 
 src/ast-diffing: $(OBJ)
