@@ -10,7 +10,7 @@ Tree::Tree()
 	idx_ = node_count_++;
 }
 
-Tree::Tree(std::string& value, Tree* parent)
+Tree::Tree(std::string& value, std::shared_ptr<Tree>& parent)
     : value_(value)
     , parent_(parent)
     , height_(1)
@@ -21,7 +21,6 @@ Tree::Tree(std::string& value, Tree* parent)
 
 void Tree::AddChild(std::shared_ptr<Tree>& tree)
 {
-	tree->parent_ = this;
 	children_.push_back(tree);
 }
 
@@ -91,6 +90,16 @@ int Tree::GetHeight()
 	return height_;
 }
 
+std::shared_ptr<Tree>& Tree::GetParent()
+{
+	return parent_;
+}
+
+void Tree::SetParent(std::shared_ptr<Tree>& p)
+{
+	parent_ = p;
+}
+
 int Tree::computeHeightDepth(int depth)
 {
 	depth_ = depth;
@@ -146,6 +155,9 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 	if (value_ != t->value_)
 		return false;
 
+	if (children_.size() == 0)
+		return true;
+
 	for (size_t i = 0; i < children_.size(); i++)
 	{
 		auto found = std::find_if(
@@ -154,7 +166,7 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 			    return elem->value_ == children_[i]->value_;
 		    });
 
-		if (found == children_.end())
+		if (found == t->children_.end())
 			return false;
 
 		if (!children_[i]->IsIsomorphic(*found))

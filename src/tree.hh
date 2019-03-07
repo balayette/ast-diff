@@ -9,7 +9,7 @@ class Tree
 {
     public:
 	Tree();
-	Tree(std::string& value, Tree* parent);
+	Tree(std::string& value, std::shared_ptr<Tree>& parent);
 
 	void AddChild(std::shared_ptr<Tree>& tree);
 	std::ostream& Print(std::ostream& stream);
@@ -23,6 +23,9 @@ class Tree
 	void SetHeight(int height);
 	int GetHeight();
 	int ComputeHeightDepth();
+
+	std::shared_ptr<Tree>& GetParent();
+	void SetParent(std::shared_ptr<Tree>& p);
 
 	std::ostream& PrettyPrint(std::ostream& stream);
 	std::ostream& DumpDot(std::ostream& stream);
@@ -38,7 +41,7 @@ class Tree
     private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;
-	Tree* parent_;
+	std::shared_ptr<Tree> parent_;
 
 	inline static int node_count_ = 0;
 
