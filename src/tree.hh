@@ -38,6 +38,12 @@ class Tree
 
 	bool IsIsomorphic(std::shared_ptr<Tree>& t);
 
+	friend void DumpMapping(
+	    std::ostream& stream, std::shared_ptr<Tree>& t1,
+	    std::shared_ptr<Tree>& t2,
+	    std::vector<
+		std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>& v);
+
     private:
 	std::string value_;
 	std::vector<std::shared_ptr<Tree>> children_;

@@ -124,10 +124,10 @@ void Tree::dumpDot(std::ostream& stream)
 {
 	std::string out(value_);
 	out = std::regex_replace(out, std::regex("\\\""), "\\\"");
-	stream << '\t' << idx_ << " [label=\"" << out << "\"]\n";
+	stream << '\t' << idx_ << " [label=\"" << out << "\"];\n";
 
 	for (auto& it : children_)
-		stream << '\t' << idx_ << " -> " << it->idx_ << '\n';
+		stream << '\t' << idx_ << " -> " << it->idx_ << ";\n";
 
 	stream << '\n';
 
@@ -176,12 +176,12 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 	return true;
 }
 
-void getDescendants(std::shared_ptr<Tree>& t, std::vector<std::shared_ptr<Tree>>& v)
+void getDescendants(std::shared_ptr<Tree>& t,
+		    std::vector<std::shared_ptr<Tree>>& v)
 {
-
 	auto& children = t->GetChildren();
 	v.insert(v.end(), children.begin(), children.end());
-	for (auto& it: children)
+	for (auto& it : children)
 		getDescendants(it, v);
 }
 
@@ -192,4 +192,22 @@ std::vector<std::shared_ptr<Tree>> GetDescendants(std::shared_ptr<Tree>& t)
 	getDescendants(t, v);
 
 	return v;
+}
+
+void DumpMapping(
+    std::ostream& stream, std::shared_ptr<Tree>& t1, std::shared_ptr<Tree>& t2,
+    std::vector<std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>& v)
+{
+	stream << "digraph G {\n\tsubgraph AST1 {\n";
+	t1->dumpDot(stream);
+	stream << "}\n\tsubgraph AST2 {\n";
+	t2->dumpDot(stream);
+	stream << "}\n";
+
+	for (auto p : v)
+		stream
+		    << p.first->idx_ << " -> " << p.second->idx_
+		    << " [fillcolor = blue] [color = blue] [style = dashed];\n";
+
+	stream << "}\n";
 }

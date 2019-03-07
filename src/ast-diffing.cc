@@ -57,4 +57,7 @@ int main(int argc, char* argv[])
 		std::cout << it.first->GetValue() << " mapped to "
 			  << it.second->GetValue() << '\n';
 	}
+
+	std::ofstream map("map.dot");
+	DumpMapping(map, ret, ret2, mapping);
 }
