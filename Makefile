@@ -11,6 +11,7 @@ SRC = \
 	src/symbol.cc \
 	src/heap.cc \
 	src/algo.cc \
+	src/mappings.cc \
 
 OBJ = $(SRC:.cc=.o)
 
