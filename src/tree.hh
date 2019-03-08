@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "symbol.hh"
+
 class Tree
 {
     public:
@@ -23,7 +25,7 @@ class Tree
 	std::vector<ptr>& GetChildren();
 
 	void SetValue(std::string& value);
-	std::string& GetValue();
+	Symbol& GetValue();
 
 	void SetHeight(int height);
 	int GetHeight();
@@ -47,7 +49,7 @@ class Tree
 				vecpair& v);
 
     private:
-	std::string value_;
+	Symbol value_;
 	vecptr children_;
 	ptr parent_;
 

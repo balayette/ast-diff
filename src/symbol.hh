@@ -14,7 +14,12 @@ class Symbol
 
 	bool operator==(const Symbol& rhs);
 	bool operator!=(const Symbol& rhs);
+
+	int size();
+
 	friend std::ostream& operator<<(std::ostream& ostr, const Symbol& the);
+
+	const std::string& get();
 
     private:
 	std::set<std::string>& getSet();

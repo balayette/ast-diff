@@ -40,5 +40,15 @@ bool Symbol::operator!=(const Symbol& rhs)
 
 std::ostream& operator<<(std::ostream& ostr, const Symbol& the)
 {
-	return ostr << the.instance_;
+	return ostr << *the.instance_;
+}
+
+int Symbol::size()
+{
+	return instance_->size();
+}
+
+const std::string& Symbol::get()
+{
+	return *instance_;
 }

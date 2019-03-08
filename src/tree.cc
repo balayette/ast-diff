@@ -75,7 +75,7 @@ void Tree::SetValue(std::string& value)
 	value_ = value;
 }
 
-std::string& Tree::GetValue()
+Symbol& Tree::GetValue()
 {
 	return value_;
 }
@@ -122,7 +122,7 @@ int Tree::ComputeHeightDepth()
 
 void Tree::dumpDot(std::ostream& stream)
 {
-	std::string out(value_);
+	std::string out(value_.get());
 	out = std::regex_replace(out, std::regex("\\\""), "\\\"");
 	stream << '\t' << idx_ << " [label=\"" << out << "\"];\n";
 
