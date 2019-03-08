@@ -10,7 +10,7 @@ Tree::Tree()
 	idx_ = node_count_++;
 }
 
-Tree::Tree(std::string& value, std::shared_ptr<Tree>& parent)
+Tree::Tree(std::string& value, Tree::ptr& parent)
     : value_(value)
     , parent_(parent)
     , height_(1)
@@ -19,7 +19,7 @@ Tree::Tree(std::string& value, std::shared_ptr<Tree>& parent)
 	idx_ = node_count_++;
 }
 
-void Tree::AddChild(std::shared_ptr<Tree>& tree)
+void Tree::AddChild(Tree::ptr& tree)
 {
 	children_.push_back(tree);
 }
@@ -65,7 +65,7 @@ size_t Tree::ChildrenSize()
 	return children_.size();
 }
 
-std::vector<std::shared_ptr<Tree>>& Tree::GetChildren()
+Tree::vecptr& Tree::GetChildren()
 {
 	return children_;
 }
@@ -90,12 +90,12 @@ int Tree::GetHeight()
 	return height_;
 }
 
-std::shared_ptr<Tree>& Tree::GetParent()
+Tree::ptr& Tree::GetParent()
 {
 	return parent_;
 }
 
-void Tree::SetParent(std::shared_ptr<Tree>& p)
+void Tree::SetParent(Tree::ptr& p)
 {
 	parent_ = p;
 }
@@ -144,7 +144,7 @@ std::ostream& Tree::DumpDot(std::ostream& stream)
 	return stream << "}\n";
 }
 
-bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
+bool Tree::IsIsomorphic(Tree::ptr& t)
 {
 	if (height_ != t->height_)
 		return false;
@@ -162,7 +162,7 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 	{
 		auto found = std::find_if(
 		    t->children_.begin(), t->children_.end(),
-		    [&](std::shared_ptr<Tree>& elem) {
+		    [&](Tree::ptr& elem) {
 			    return elem->value_ == children_[i]->value_;
 		    });
 
@@ -176,8 +176,7 @@ bool Tree::IsIsomorphic(std::shared_ptr<Tree>& t)
 	return true;
 }
 
-void getDescendants(std::shared_ptr<Tree>& t,
-		    std::vector<std::shared_ptr<Tree>>& v)
+void getDescendants(Tree::ptr& t, Tree::vecptr& v)
 {
 	auto& children = t->GetChildren();
 	v.insert(v.end(), children.begin(), children.end());
@@ -185,18 +184,17 @@ void getDescendants(std::shared_ptr<Tree>& t,
 		getDescendants(it, v);
 }
 
-std::vector<std::shared_ptr<Tree>> GetDescendants(std::shared_ptr<Tree>& t)
+Tree::vecptr GetDescendants(Tree::ptr& t)
 {
-	std::vector<std::shared_ptr<Tree>> v;
+	Tree::vecptr v;
 
 	getDescendants(t, v);
 
 	return v;
 }
 
-void DumpMapping(
-    std::ostream& stream, std::shared_ptr<Tree>& t1, std::shared_ptr<Tree>& t2,
-    std::vector<std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>& v)
+void DumpMapping(std::ostream& stream, Tree::ptr& t1, Tree::ptr& t2,
+		 Tree::vecpair& v)
 {
 	stream << "digraph G {\n\tsubgraph AST1 {\n";
 	t1->dumpDot(stream);
@@ -205,9 +203,9 @@ void DumpMapping(
 	stream << "}\n";
 
 	for (auto p : v)
-		stream
-		    << p.first->idx_ << " -> " << p.second->idx_
-		    << " [fillcolor = blue] [color = blue] [style = dashed] [constraint = false];\n";
+		stream << p.first->idx_ << " -> " << p.second->idx_
+		       << " [fillcolor = blue] [color = blue] [style = dashed] "
+			  "[constraint = false];\n";
 
 	stream << "}\n";
 }

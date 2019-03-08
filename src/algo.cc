@@ -8,16 +8,14 @@
 
 struct GumtreeData
 {
-	std::shared_ptr<Tree> SourceTree;
-	std::shared_ptr<Tree> DestTree;
+	Tree::ptr SourceTree;
+	Tree::ptr DestTree;
 
 	Heap L1;
 	Heap L2;
 
-	std::vector<std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>
-	    Candidates;
-	std::vector<std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>
-	    Map;
+	Tree::vecpair Candidates;
+	Tree::vecpair Map;
 
 	int MinHeight;
 };
@@ -35,14 +33,13 @@ void differentHeights(GumtreeData& data)
 		data.L2.Open(t);
 }
 
-void addPairOfIsomorphicDescendants(GumtreeData& data,
-				    std::shared_ptr<Tree>& t1,
-				    std::shared_ptr<Tree>& t2)
+void addPairOfIsomorphicDescendants(GumtreeData& data, Tree::ptr& t1,
+				    Tree::ptr& t2)
 {
 	auto desc1 = GetDescendants(t1);
 	auto desc2 = GetDescendants(t2);
 	foreach_pair(desc1.begin(), desc1.end(), desc2.begin(), desc2.end(),
-		     [&](std::shared_ptr<Tree>& a, std::shared_ptr<Tree>& b) {
+		     [&](Tree::ptr& a, Tree::ptr& b) {
 			     std::cout << a->GetValue() << " iso "
 				       << b->GetValue() << '?';
 			     if (a->IsIsomorphic(b))
@@ -54,22 +51,18 @@ void addPairOfIsomorphicDescendants(GumtreeData& data,
 		     });
 }
 
-void isomorphicPair(GumtreeData& data, std::shared_ptr<Tree>& t1,
-		    std::shared_ptr<Tree>& t2)
+void isomorphicPair(GumtreeData& data, Tree::ptr& t1, Tree::ptr& t2)
 {
-	auto iso1 = FindAll(data.DestTree, [&](std::shared_ptr<Tree>& tx) {
-		return t1->IsIsomorphic(tx);
-	});
-	auto iso2 = FindAll(data.SourceTree, [&](std::shared_ptr<Tree>& tx) {
+	auto iso1 = FindAll(
+	    data.DestTree, [&](Tree::ptr& tx) { return t1->IsIsomorphic(tx); });
+	auto iso2 = FindAll(data.SourceTree, [&](Tree::ptr& tx) {
 		return tx->IsIsomorphic(t2);
 	});
 
-	auto it1 =
-	    std::find_if(iso1.begin(), iso1.end(),
-			 [&](std::shared_ptr<Tree>& tx) { return tx != t2; });
-	auto it2 =
-	    std::find_if(iso2.begin(), iso2.end(),
-			 [&](std::shared_ptr<Tree>& tx) { return tx != t1; });
+	auto it1 = std::find_if(iso1.begin(), iso1.end(),
+				[&](Tree::ptr& tx) { return tx != t2; });
+	auto it2 = std::find_if(iso2.begin(), iso2.end(),
+				[&](Tree::ptr& tx) { return tx != t1; });
 
 	if (it1 != iso1.end() || it2 != iso2.end())
 	{
@@ -86,7 +79,7 @@ void isomorphicPair(GumtreeData& data, std::shared_ptr<Tree>& t1,
 	}
 }
 
-void doOpenT1(GumtreeData& data, std::shared_ptr<Tree>& t1)
+void doOpenT1(GumtreeData& data, Tree::ptr& t1)
 {
 	for (auto& [a, b] : data.Candidates)
 	{
@@ -103,7 +96,7 @@ void doOpenT1(GumtreeData& data, std::shared_ptr<Tree>& t1)
 	data.L1.Open(t1);
 }
 
-void doOpenT2(GumtreeData& data, std::shared_ptr<Tree>& t2)
+void doOpenT2(GumtreeData& data, Tree::ptr& t2)
 {
 	for (auto& [a, b] : data.Candidates)
 	{
@@ -152,7 +145,7 @@ void sameHeights(GumtreeData& data)
 		doOpenT2(data, t2);
 }
 
-double dice(std::shared_ptr<Tree>& t1, std::shared_ptr<Tree>& t2)
+double dice(Tree::ptr& t1, Tree::ptr& t2)
 {
 	auto des1 = GetDescendants(t1);
 	auto des2 = GetDescendants(t2);
@@ -163,8 +156,7 @@ double dice(std::shared_ptr<Tree>& t1, std::shared_ptr<Tree>& t2)
 	return (2.0 * c) / ((double)des1.size() + (double)des2.size());
 }
 
-std::vector<std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>
-Gumtree(std::shared_ptr<Tree> SourceTree, std::shared_ptr<Tree> DestTree)
+Tree::vecpair Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
 {
 	GumtreeData data;
 	data.SourceTree = SourceTree;
@@ -188,8 +180,7 @@ Gumtree(std::shared_ptr<Tree> SourceTree, std::shared_ptr<Tree> DestTree)
 	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
 	std::sort(
 	    data.Candidates.begin(), data.Candidates.end(),
-	    [&](std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>& a,
-		std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>& b) {
+	    [&](Tree::pair& a, Tree::pair& b) {
 		    return dice(a.first->GetParent(), a.second->GetParent())
 			< dice(b.first->GetParent(), b.second->GetParent());
 	    });

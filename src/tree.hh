@@ -8,14 +8,19 @@
 class Tree
 {
     public:
-	Tree();
-	Tree(std::string& value, std::shared_ptr<Tree>& parent);
+	using ptr = std::shared_ptr<Tree>;
+	using vecptr = std::vector<std::shared_ptr<Tree>>;
+	using pair = std::pair<ptr, ptr>;
+	using vecpair = std::vector<pair>;
 
-	void AddChild(std::shared_ptr<Tree>& tree);
+	Tree();
+	Tree(std::string& value, ptr& parent);
+
+	void AddChild(ptr& tree);
 	std::ostream& Print(std::ostream& stream);
 
 	size_t ChildrenSize();
-	std::vector<std::shared_ptr<Tree>>& GetChildren();
+	std::vector<ptr>& GetChildren();
 
 	void SetValue(std::string& value);
 	std::string& GetValue();
@@ -24,8 +29,8 @@ class Tree
 	int GetHeight();
 	int ComputeHeightDepth();
 
-	std::shared_ptr<Tree>& GetParent();
-	void SetParent(std::shared_ptr<Tree>& p);
+	ptr& GetParent();
+	void SetParent(ptr& p);
 
 	std::ostream& PrettyPrint(std::ostream& stream);
 	std::ostream& DumpDot(std::ostream& stream);
@@ -36,18 +41,15 @@ class Tree
 	template <typename Func>
 	void PostorderTraversal(Func f);
 
-	bool IsIsomorphic(std::shared_ptr<Tree>& t);
+	bool IsIsomorphic(ptr& t);
 
-	friend void DumpMapping(
-	    std::ostream& stream, std::shared_ptr<Tree>& t1,
-	    std::shared_ptr<Tree>& t2,
-	    std::vector<
-		std::pair<std::shared_ptr<Tree>, std::shared_ptr<Tree>>>& v);
+	friend void DumpMapping(std::ostream& stream, ptr& t1, ptr& t2,
+				vecpair& v);
 
     private:
 	std::string value_;
-	std::vector<std::shared_ptr<Tree>> children_;
-	std::shared_ptr<Tree> parent_;
+	vecptr children_;
+	ptr parent_;
 
 	inline static int node_count_ = 0;
 
@@ -59,12 +61,12 @@ class Tree
 	void dumpDot(std::ostream& stream);
 };
 
-std::vector<std::shared_ptr<Tree>> GetDescendants(std::shared_ptr<Tree>& t);
+Tree::vecptr GetDescendants(Tree::ptr& t);
 
 template <typename Pred>
-std::shared_ptr<Tree> FindIf(std::shared_ptr<Tree> t, Pred f);
+Tree::ptr FindIf(Tree::ptr t, Pred f);
 
 template <typename Pred>
-std::vector<std::shared_ptr<Tree>> FindAll(std::shared_ptr<Tree>& t, Pred f);
+Tree::vecptr FindAll(Tree::ptr& t, Pred f);
 
 #include "tree.hxx"

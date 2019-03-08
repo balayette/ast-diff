@@ -10,24 +10,21 @@ class Heap
     public:
 	Heap() = default;
 
-	void Push(std::shared_ptr<Tree> t);
+	void Push(Tree::ptr t);
 	int PeekMax();
-	std::vector<std::shared_ptr<Tree>> Pop();
-	void Open(std::shared_ptr<Tree> t);
+	Tree::vecptr Pop();
+	void Open(Tree::ptr t);
 
 	int size();
 
     private:
 	struct compare_tree
 	{
-		bool operator()(const std::shared_ptr<Tree>& t1,
-				const std::shared_ptr<Tree>& t2)
+		bool operator()(const Tree::ptr& t1, const Tree::ptr& t2)
 		{
 			return t1->GetHeight() < t2->GetHeight();
 		}
 	};
 
-	std::priority_queue<std::shared_ptr<Tree>,
-			    std::vector<std::shared_ptr<Tree>>, compare_tree>
-	    heap_;
+	std::priority_queue<Tree::ptr, Tree::vecptr, compare_tree> heap_;
 };

@@ -1,6 +1,6 @@
 #include "heap.hh"
 
-void Heap::Push(std::shared_ptr<Tree> t)
+void Heap::Push(Tree::ptr t)
 {
 	heap_.push(t);
 }
@@ -12,12 +12,12 @@ int Heap::PeekMax()
 	return heap_.top()->GetHeight();
 }
 
-std::vector<std::shared_ptr<Tree>> Heap::Pop()
+Tree::vecptr Heap::Pop()
 {
 	if (heap_.size() == 0)
 		throw "Pop called on empty heap.";
 
-	std::vector<std::shared_ptr<Tree>> ret;
+	Tree::vecptr ret;
 
 	for (int max = heap_.top()->GetHeight();
 	     heap_.size() > 0 && heap_.top()->GetHeight() == max; heap_.pop())
@@ -26,7 +26,7 @@ std::vector<std::shared_ptr<Tree>> Heap::Pop()
 	return ret;
 }
 
-void Heap::Open(std::shared_ptr<Tree> t)
+void Heap::Open(Tree::ptr t)
 {
 	for (auto it : t->GetChildren())
 		heap_.push(it);

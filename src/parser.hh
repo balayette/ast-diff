@@ -11,7 +11,7 @@ class Parser
     public:
 	Parser(Lexer& lexer);
 
-	std::shared_ptr<Tree> Parse();
+	Tree::ptr Parse();
 
     private:
 	Lexer& lexer_;

@@ -9,9 +9,9 @@ Parser::Parser(Lexer& lexer)
     : lexer_(lexer)
 {}
 
-std::shared_ptr<Tree> Parser::Parse()
+Tree::ptr Parser::Parse()
 {
-	auto stack = std::stack<std::shared_ptr<Tree>>{};
+	auto stack = std::stack<Tree::ptr>{};
 
 	stack.push(std::make_shared<Tree>());
 
