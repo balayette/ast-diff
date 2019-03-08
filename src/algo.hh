@@ -4,5 +4,6 @@
 #include <memory>
 
 #include "tree.hh"
+#include "mappings.hh"
 
-Tree::vecpair Gumtree(Tree::ptr t1, Tree::ptr t2);
+Mappings Gumtree(Tree::ptr t1, Tree::ptr t2);

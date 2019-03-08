@@ -14,8 +14,8 @@ struct GumtreeData
 	Heap L1;
 	Heap L2;
 
-	Tree::vecpair Candidates;
-	Tree::vecpair Map;
+	Mappings Candidates;
+	Mappings Map;
 
 	int MinHeight;
 };
@@ -44,7 +44,7 @@ void addPairOfIsomorphicDescendants(GumtreeData& data, Tree::ptr& t1,
 				       << b->GetValue() << '?';
 			     if (a->IsIsomorphic(b))
 			     {
-				     data.Map.emplace_back(a, b);
+				     data.Map.AddMapping(a, b);
 				     std::cout << " Yes.\n";
 			     } else
 				     std::cout << " No.\n";
@@ -68,13 +68,13 @@ void isomorphicPair(GumtreeData& data, Tree::ptr& t1, Tree::ptr& t2)
 	{
 		std::cout << "Multiple matches\n";
 		for (auto it = it1; it != iso1.end(); it++)
-			data.Candidates.emplace_back(t1, *it);
+			data.Candidates.AddMapping(t1, *it);
 		for (auto it = it2; it != iso2.end(); it++)
-			data.Candidates.emplace_back(*it, t2);
+			data.Candidates.AddMapping(*it, t2);
 	} else
 	{
 		std::cout << "Single match, cool\n";
-		data.Map.emplace_back(t1, t2);
+		data.Map.AddMapping(t1, t2);
 		addPairOfIsomorphicDescendants(data, t1, t2);
 	}
 }
@@ -156,7 +156,7 @@ double dice(Tree::ptr& t1, Tree::ptr& t2)
 	return (2.0 * c) / ((double)des1.size() + (double)des2.size());
 }
 
-Tree::vecpair Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
+Mappings Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
 {
 	GumtreeData data;
 	data.SourceTree = SourceTree;

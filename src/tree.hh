@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "symbol.hh"
+#include "mappings.hh"
 
 class Tree
 {
@@ -46,7 +47,7 @@ class Tree
 	bool IsIsomorphic(ptr& t);
 
 	friend void DumpMapping(std::ostream& stream, ptr& t1, ptr& t2,
-				vecpair& v);
+				Mappings& v);
 
     private:
 	Symbol value_;

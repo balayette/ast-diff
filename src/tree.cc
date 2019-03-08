@@ -194,7 +194,7 @@ Tree::vecptr GetDescendants(Tree::ptr& t)
 }
 
 void DumpMapping(std::ostream& stream, Tree::ptr& t1, Tree::ptr& t2,
-		 Tree::vecpair& v)
+		 Mappings& v)
 {
 	stream << "digraph G {\n\tsubgraph AST1 {\n";
 	t1->dumpDot(stream);
