@@ -2,10 +2,8 @@
 
 Symbol::Symbol(const std::string& str)
 {
-	std::cout << "String: " << str << '\n';
 	getSet().insert(str);
 	instance_ = &(*(getSet().find(str)));
-	std::cout << "instance: " << instance_ << '\n';
 }
 
 Symbol::Symbol(const char* str)

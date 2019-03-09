@@ -8,8 +8,8 @@
 
 struct GumtreeData
 {
-	Tree::ptr SourceTree;
-	Tree::ptr DestTree;
+	Tree& SourceTree;
+	Tree& DestTree;
 
 	Heap L1;
 	Heap L2;
@@ -18,6 +18,9 @@ struct GumtreeData
 	Mappings Map;
 
 	int MinHeight;
+
+	inline GumtreeData(Tree& src, Tree& dst) : SourceTree(src), DestTree(dst)
+	{};
 };
 
 void differentHeights(GumtreeData& data)
@@ -33,16 +36,15 @@ void differentHeights(GumtreeData& data)
 		data.L2.Open(t);
 }
 
-void addPairOfIsomorphicDescendants(GumtreeData& data, Tree::ptr& t1,
-				    Tree::ptr& t2)
+void addPairOfIsomorphicDescendants(GumtreeData& data, Tree& t1, Tree& t2)
 {
 	auto desc1 = GetDescendants(t1);
 	auto desc2 = GetDescendants(t2);
 	foreach_pair(desc1.begin(), desc1.end(), desc2.begin(), desc2.end(),
-		     [&](Tree::ptr& a, Tree::ptr& b) {
-			     std::cout << a->GetValue() << " iso "
-				       << b->GetValue() << '?';
-			     if (a->IsIsomorphic(b))
+		     [&](Tree& a, Tree& b) {
+			     std::cout << a.GetValue() << " iso "
+				       << b.GetValue() << '?';
+			     if (a.IsIsomorphic(b))
 			     {
 				     data.Map.AddMapping(a, b);
 				     std::cout << " Yes.\n";
@@ -51,18 +53,17 @@ void addPairOfIsomorphicDescendants(GumtreeData& data, Tree::ptr& t1,
 		     });
 }
 
-void isomorphicPair(GumtreeData& data, Tree::ptr& t1, Tree::ptr& t2)
+void isomorphicPair(GumtreeData& data, Tree& t1, Tree& t2)
 {
-	auto iso1 = FindAll(
-	    data.DestTree, [&](Tree::ptr& tx) { return t1->IsIsomorphic(tx); });
-	auto iso2 = FindAll(data.SourceTree, [&](Tree::ptr& tx) {
-		return tx->IsIsomorphic(t2);
-	});
+	auto iso1 = FindAll(data.DestTree,
+			    [&](Tree& tx) { return t1.IsIsomorphic(tx); });
+	auto iso2 = FindAll(data.SourceTree,
+			    [&](Tree& tx) { return tx.IsIsomorphic(t2); });
 
 	auto it1 = std::find_if(iso1.begin(), iso1.end(),
-				[&](Tree::ptr& tx) { return tx != t2; });
+				[&](Tree& tx) { return tx != t2; });
 	auto it2 = std::find_if(iso2.begin(), iso2.end(),
-				[&](Tree::ptr& tx) { return tx != t1; });
+				[&](Tree& tx) { return tx != t1; });
 
 	if (it1 != iso1.end() || it2 != iso2.end())
 	{
@@ -79,34 +80,34 @@ void isomorphicPair(GumtreeData& data, Tree::ptr& t1, Tree::ptr& t2)
 	}
 }
 
-void doOpenT1(GumtreeData& data, Tree::ptr& t1)
+void doOpenT1(GumtreeData& data, Tree& t1)
 {
 	for (auto& [a, b] : data.Candidates)
 	{
-		if (a == t1)
+		if (a.get() == t1)
 			return;
 	}
 
 	for (auto& [a, b] : data.Map)
 	{
-		if (a == t1)
+		if (a.get() == t1)
 			return;
 	}
 
 	data.L1.Open(t1);
 }
 
-void doOpenT2(GumtreeData& data, Tree::ptr& t2)
+void doOpenT2(GumtreeData& data, Tree& t2)
 {
 	for (auto& [a, b] : data.Candidates)
 	{
-		if (b == t2)
+		if (b.get() == t2)
 			return;
 	}
 
 	for (auto& [a, b] : data.Map)
 	{
-		if (b == t2)
+		if (b.get() == t2)
 			return;
 	}
 
@@ -120,17 +121,17 @@ void sameHeights(GumtreeData& data)
 
 	std::cout << "h1\n";
 	for (auto& it : h1)
-		std::cout << it->GetValue() << '\n';
+		std::cout << it.get().GetValue() << '\n';
 
 	std::cout << "h2\n";
 	for (auto& it : h2)
-		std::cout << it->GetValue() << '\n';
+		std::cout << it.get().GetValue() << '\n';
 
 	foreach_pair(h1.begin(), h1.end(), h2.begin(), h2.end(),
 		     [&](auto& t1, auto& t2) {
-			     std::cout << t1->GetValue() << " iso to "
-				       << t2->GetValue() << '?';
-			     if (!t1->IsIsomorphic(t2))
+			     std::cout << t1.get().GetValue() << " iso to "
+				       << t2.get().GetValue() << '?';
+			     if (!t1.get().IsIsomorphic(t2))
 			     {
 				     std::cout << " No.\n";
 				     return;
@@ -139,13 +140,13 @@ void sameHeights(GumtreeData& data)
 			     isomorphicPair(data, t1, t2);
 		     });
 
-	for (auto& t1 : h1)
+	for (const auto& t1 : h1)
 		doOpenT1(data, t1);
-	for (auto& t2 : h2)
+	for (const auto& t2 : h2)
 		doOpenT2(data, t2);
 }
 
-double dice(Tree::ptr& t1, Tree::ptr& t2)
+double dice(Tree& t1, Tree& t2)
 {
 	auto des1 = GetDescendants(t1);
 	auto des2 = GetDescendants(t2);
@@ -156,11 +157,9 @@ double dice(Tree::ptr& t1, Tree::ptr& t2)
 	return (2.0 * c) / ((double)des1.size() + (double)des2.size());
 }
 
-Mappings Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
+Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 {
-	GumtreeData data;
-	data.SourceTree = SourceTree;
-	data.DestTree = DestTree;
+	GumtreeData data(SourceTree, DestTree);
 
 	data.MinHeight = 1;
 
@@ -180,9 +179,9 @@ Mappings Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
 	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
 	std::sort(
 	    data.Candidates.begin(), data.Candidates.end(),
-	    [&](Tree::pair& a, Tree::pair& b) {
-		    return dice(a.first->GetParent(), a.second->GetParent())
-			< dice(b.first->GetParent(), b.second->GetParent());
+	    [&](Mappings::treepair& a, Mappings::treepair& b) {
+		    return dice(a.first.get().GetParent(), a.second.get().GetParent())
+			< dice(b.first.get().GetParent(), b.second.get().GetParent());
 	    });
 
 	while (data.Candidates.size() > 0)
@@ -193,8 +192,8 @@ Mappings Gumtree(Tree::ptr SourceTree, Tree::ptr DestTree)
 
 		std::remove_if(data.Candidates.begin(), data.Candidates.end(),
 			       [&](auto& p) {
-				       return p.first == pair.first
-					   || p.second == pair.second;
+				       return p.first.get() == pair.first.get()
+					   || p.second.get() == pair.second.get();
 			       });
 	}
 

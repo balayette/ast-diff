@@ -6,4 +6,4 @@
 #include "tree.hh"
 #include "mappings.hh"
 
-Mappings Gumtree(Tree::ptr t1, Tree::ptr t2);
+Mappings Gumtree(Tree& t1, Tree& t2);

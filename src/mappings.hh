@@ -8,17 +8,17 @@ class Tree;
 class Mappings
 {
     public:
-	using treeptr = std::shared_ptr<Tree>;
+	using treeptr = std::reference_wrapper<Tree>;
 	using treepair = std::pair<treeptr, treeptr>;
 	using mapping_store = std::vector<treepair>;
 	using mapping_iterator = mapping_store::iterator;
 
-	void AddMapping(treeptr& t1, treeptr& t2);
+	void AddMapping(treeptr t1, treeptr t2);
 
-	bool ContainsMapping(treeptr& t1, treeptr& t2);
+	bool ContainsMapping(treeptr t1, treeptr t2);
 
-	bool ContainsMappingFirst(treeptr& t);
-	bool ContainsMappingSecond(treeptr& t);
+	bool ContainsMappingFirst(treeptr t);
+	bool ContainsMappingSecond(treeptr t);
 
 	int size();
 

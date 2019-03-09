@@ -3,7 +3,7 @@
 template <typename Func>
 void Tree::PreorderTraversal(Func f)
 {
-	f(this);
+	f(*this);
 
 	for (auto& it : children_)
 		it->PreorderTraversal(f);
@@ -15,44 +15,44 @@ void Tree::PostorderTraversal(Func f)
 	for (auto& it : children_)
 		it->PreorderTraversal(f);
 
-	f(this);
+	f(*this);
 }
 
 template <typename Pred>
-std::shared_ptr<Tree> FindIf(std::shared_ptr<Tree>& t, Pred f)
+std::optional<std::reference_wrapper<Tree>> FindIf(Tree& t, Pred f)
 {
 	if (f(t))
 		return t;
 
-	auto& children = t->GetChildren();
+	auto& children = t.GetChildren();
 	if (children.size() == 0)
-		return nullptr;
+		return std::nullopt;
 
 	for (const auto& it : children)
 	{
-		auto r = FindIf(it, f);
-		if (r != nullptr)
+		auto r = FindIf(*it, f);
+		if (r != std::nullopt)
 			return r;
 	}
 
-	return nullptr;
+	return std::nullopt;
 }
 
 template <typename Pred>
-void findAll(std::shared_ptr<Tree>& t, Pred f,
-	     std::vector<std::shared_ptr<Tree>>& v)
+void findAll(Tree& t, Pred f,
+	     Tree::vecref& v)
 {
 	if (f(t))
 		v.push_back(t);
 
-	for (auto& it : t->GetChildren())
-		findAll(it, f, v);
+	for (auto& it : t.GetChildren())
+		findAll(*it, f, v);
 }
 
 template <typename Pred>
-std::vector<std::shared_ptr<Tree>> FindAll(std::shared_ptr<Tree>& t, Pred f)
+Tree::vecref FindAll(Tree& t, Pred f)
 {
-	std::vector<std::shared_ptr<Tree>> v;
+	Tree::vecref v;
 
 	findAll(t, f, v);
 

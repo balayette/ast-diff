@@ -10,9 +10,9 @@ Tree::Tree()
 	idx_ = node_count_++;
 }
 
-Tree::Tree(std::string& value, Tree::ptr& parent)
+Tree::Tree(std::string& value, Tree& parent)
     : value_(value)
-    , parent_(parent)
+    , parent_(&parent)
     , height_(1)
     , depth_(1)
 {
@@ -90,14 +90,14 @@ int Tree::GetHeight()
 	return height_;
 }
 
-Tree::ptr& Tree::GetParent()
+Tree& Tree::GetParent()
 {
-	return parent_;
+	return *parent_;
 }
 
-void Tree::SetParent(Tree::ptr& p)
+void Tree::SetParent(Tree& p)
 {
-	parent_ = p;
+	parent_ = &p;
 }
 
 int Tree::computeHeightDepth(int depth)
@@ -144,15 +144,15 @@ std::ostream& Tree::DumpDot(std::ostream& stream)
 	return stream << "}\n";
 }
 
-bool Tree::IsIsomorphic(Tree::ptr& t)
+bool Tree::IsIsomorphic(Tree& t)
 {
-	if (height_ != t->height_)
+	if (height_ != t.height_)
 		return false;
 
-	if (children_.size() != t->children_.size())
+	if (children_.size() != t.children_.size())
 		return false;
 
-	if (value_ != t->value_)
+	if (value_ != t.value_)
 		return false;
 
 	if (children_.size() == 0)
@@ -161,51 +161,67 @@ bool Tree::IsIsomorphic(Tree::ptr& t)
 	for (size_t i = 0; i < children_.size(); i++)
 	{
 		auto found = std::find_if(
-		    t->children_.begin(), t->children_.end(),
+		    t.children_.begin(), t.children_.end(),
 		    [&](Tree::ptr& elem) {
 			    return elem->value_ == children_[i]->value_;
 		    });
 
-		if (found == t->children_.end())
+		if (found == t.children_.end())
 			return false;
 
-		if (!children_[i]->IsIsomorphic(*found))
+		if (!children_[i]->IsIsomorphic(**found))
 			return false;
 	}
 
 	return true;
 }
 
-void getDescendants(Tree::ptr& t, Tree::vecptr& v)
+void getDescendants(Tree& t, Tree::vecref& v)
 {
-	auto& children = t->GetChildren();
-	v.insert(v.end(), children.begin(), children.end());
+	auto& children = t.GetChildren();
+	for (const auto& child : children)
+		v.push_back(*child);
+
 	for (auto& it : children)
-		getDescendants(it, v);
+		getDescendants(*it, v);
 }
 
-Tree::vecptr GetDescendants(Tree::ptr& t)
+Tree::vecref GetDescendants(Tree& t)
 {
-	Tree::vecptr v;
+	Tree::vecref v;
 
 	getDescendants(t, v);
 
 	return v;
 }
 
-void DumpMapping(std::ostream& stream, Tree::ptr& t1, Tree::ptr& t2,
-		 Mappings& v)
+void DumpMapping(std::ostream& stream, Tree& t1, Tree& t2, Mappings& v)
 {
 	stream << "digraph G {\n\tsubgraph AST1 {\n";
-	t1->dumpDot(stream);
+	t1.dumpDot(stream);
 	stream << "}\n\tsubgraph AST2 {\n";
-	t2->dumpDot(stream);
+	t2.dumpDot(stream);
 	stream << "}\n";
 
 	for (auto p : v)
-		stream << p.first->idx_ << " -> " << p.second->idx_
+		stream << p.first.get().idx_ << " -> " << p.second.get().idx_
 		       << " [fillcolor = blue] [color = blue] [style = dashed] "
 			  "[constraint = false];\n";
 
 	stream << "}\n";
+}
+
+bool Tree::operator==(const Tree& t)
+{
+	return this == &t;
+}
+
+bool Tree::operator!=(const Tree& t)
+{
+	return this != &t;
+}
+
+bool operator==(std::reference_wrapper<Tree> a, std::reference_wrapper<Tree> b)
+{
+	return &a == &b;
 }

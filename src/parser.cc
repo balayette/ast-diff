@@ -33,18 +33,18 @@ Tree::ptr Parser::Parse()
 
 			auto t = stack.top();
 			t->AddChild(top);
-			top->SetParent(t);
+			top->SetParent(*t);
 		} else
 		{
 			if (stack.top()->GetValue().size() == 0)
 			{
 				stack.pop();
 				stack.push(std::make_shared<Tree>(
-				    tok->GetString(), stack.top()));
+				    tok->GetString(), *stack.top()));
 			} else
 			{
 				auto add = std::make_shared<Tree>(
-				    tok->GetString(), stack.top());
+				    tok->GetString(), *stack.top());
 				stack.top()->AddChild(add);
 			}
 		}

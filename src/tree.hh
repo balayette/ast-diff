@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
+#include <optional>
 
 #include "symbol.hh"
 #include "mappings.hh"
@@ -13,17 +15,20 @@ class Tree
     public:
 	using ptr = std::shared_ptr<Tree>;
 	using vecptr = std::vector<std::shared_ptr<Tree>>;
+	using opt = std::optional<Tree>;
+	using refwrap = std::reference_wrapper<Tree>;
+	using vecref = std::vector<refwrap>;
 	using pair = std::pair<ptr, ptr>;
 	using vecpair = std::vector<pair>;
 
 	Tree();
-	Tree(std::string& value, ptr& parent);
+	Tree(std::string& value, Tree& parent);
 
-	void AddChild(ptr& tree);
+	void AddChild(Tree::ptr& tree);
 	std::ostream& Print(std::ostream& stream);
 
 	size_t ChildrenSize();
-	std::vector<ptr>& GetChildren();
+	vecptr& GetChildren();
 
 	void SetValue(std::string& value);
 	Symbol& GetValue();
@@ -32,8 +37,8 @@ class Tree
 	int GetHeight();
 	int ComputeHeightDepth();
 
-	ptr& GetParent();
-	void SetParent(ptr& p);
+	Tree& GetParent();
+	void SetParent(Tree& p);
 
 	std::ostream& PrettyPrint(std::ostream& stream);
 	std::ostream& DumpDot(std::ostream& stream);
@@ -44,15 +49,17 @@ class Tree
 	template <typename Func>
 	void PostorderTraversal(Func f);
 
-	bool IsIsomorphic(ptr& t);
+	bool IsIsomorphic(Tree& t);
 
-	friend void DumpMapping(std::ostream& stream, ptr& t1, ptr& t2,
+	friend void DumpMapping(std::ostream& stream, Tree& t1, Tree& t2,
 				Mappings& v);
 
+	bool operator==(const Tree& t);
+	bool operator!=(const Tree& t);
     private:
 	Symbol value_;
 	vecptr children_;
-	ptr parent_;
+	Tree* parent_;
 
 	inline static int node_count_ = 0;
 
@@ -64,12 +71,14 @@ class Tree
 	void dumpDot(std::ostream& stream);
 };
 
-Tree::vecptr GetDescendants(Tree::ptr& t);
+Tree::vecref GetDescendants(Tree& t);
 
 template <typename Pred>
-Tree::ptr FindIf(Tree::ptr t, Pred f);
+std::optional<std::reference_wrapper<Tree>> FindIf(Tree& t, Pred f);
 
 template <typename Pred>
-Tree::vecptr FindAll(Tree::ptr& t, Pred f);
+Tree::vecref FindAll(Tree& t, Pred f);
+
+bool operator==(std::reference_wrapper<Tree> a, std::reference_wrapper<Tree> b);
 
 #include "tree.hxx"

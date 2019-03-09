@@ -50,14 +50,14 @@ int main(int argc, char* argv[])
 	ret->DumpDot(out1);
 	ret2->DumpDot(out2);
 
-	auto mapping = Gumtree(ret, ret2);
+	auto mapping = Gumtree(*ret, *ret2);
 
 	for (auto& it : mapping)
 	{
-		std::cout << it.first->GetValue() << " mapped to "
-			  << it.second->GetValue() << '\n';
+		std::cout << it.first.get().GetValue() << " mapped to "
+			  << it.second.get().GetValue() << '\n';
 	}
 
 	std::ofstream map("map.dot");
-	DumpMapping(map, ret, ret2, mapping);
+	DumpMapping(map, *ret, *ret2, mapping);
 }

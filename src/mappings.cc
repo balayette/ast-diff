@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-void Mappings::AddMapping(treeptr& t1, treeptr& t2)
+void Mappings::AddMapping(treeptr t1, treeptr t2)
 {
 	if (ContainsMapping(t1, t2))
 		return;
@@ -10,23 +10,27 @@ void Mappings::AddMapping(treeptr& t1, treeptr& t2)
 	mappings_.emplace_back(t1, t2);
 }
 
-bool Mappings::ContainsMapping(treeptr& t1, treeptr& t2)
+bool Mappings::ContainsMapping(treeptr t1, treeptr t2)
+{
+	return std::any_of(mappings_.begin(), mappings_.end(),
+			   [&](const auto& p) {
+				   return &p.first.get() == &t1.get()
+				       && &p.second.get() == &t2.get();
+			   });
+}
+
+bool Mappings::ContainsMappingFirst(treeptr t)
 {
 	return std::any_of(
 	    mappings_.begin(), mappings_.end(),
-	    [&](const auto& p) { return p.first == t1 && p.second == t2; });
+	    [&](const auto& p) { return &p.first.get() == &t.get(); });
 }
 
-bool Mappings::ContainsMappingFirst(treeptr& t)
+bool Mappings::ContainsMappingSecond(treeptr t)
 {
-	return std::any_of(mappings_.begin(), mappings_.end(),
-			   [&](const auto& p) { return p.first == t; });
-}
-
-bool Mappings::ContainsMappingSecond(treeptr& t)
-{
-	return std::any_of(mappings_.begin(), mappings_.end(),
-			   [&](const auto& p) { return p.second == t; });
+	return std::any_of(
+	    mappings_.begin(), mappings_.end(),
+	    [&](const auto& p) { return &p.second.get() == &t.get(); });
 }
 
 Mappings::treepair& Mappings::operator[](const int idx)
