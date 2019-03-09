@@ -19,7 +19,7 @@ void Tree::PostorderTraversal(Func f)
 }
 
 template <typename Pred>
-std::optional<std::reference_wrapper<Tree>> FindIf(Tree& t, Pred f)
+Tree::optref FindIf(Tree& t, Pred f)
 {
 	if (f(t))
 		return t;

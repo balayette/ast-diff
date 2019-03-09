@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
 			  << it.second.get().GetValue() << '\n';
 	}
 
+	BottomUp(*ret, *ret2, mapping);
 	std::ofstream map("map.dot");
 	DumpMapping(map, *ret, *ret2, mapping);
 }

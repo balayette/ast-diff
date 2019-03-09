@@ -9,9 +9,9 @@ Tree::Tree()
 	idx_ = node_count_++;
 }
 
-Tree::Tree(std::string& value, Tree& parent)
+Tree::Tree(std::string& value)
     : value_(value)
-    , parent_(&parent)
+    , parent_(nullptr)
     , height_(1)
     , depth_(1)
 {
@@ -99,24 +99,25 @@ void Tree::SetParent(Tree& p)
 	parent_ = &p;
 }
 
-int Tree::computeHeightDepth(int depth)
+int Tree::computeHeightDepth(int depth, Tree* parent)
 {
 	depth_ = depth;
 	auto max = 0;
 	for (auto it = children_.begin(); it != children_.end(); it++)
 	{
-		auto h = (*it)->computeHeightDepth(depth + 1);
+		auto h = (*it)->computeHeightDepth(depth + 1, this);
 		if (h > max)
 			max = h;
 	}
 
 	height_ = max + 1;
+	parent_ = parent;
 	return height_;
 }
 
 int Tree::ComputeHeightDepth()
 {
-	return computeHeightDepth(0);
+	return computeHeightDepth(0, nullptr);
 }
 
 void Tree::dumpDot(std::ostream& stream)
@@ -227,4 +228,57 @@ bool Tree::operator!=(const Tree& t)
 bool operator==(std::reference_wrapper<Tree> a, std::reference_wrapper<Tree> b)
 {
 	return &a == &b;
+}
+
+bool Tree::IsDescendantOf(Tree& t)
+{
+	if (!parent_)
+		return false;
+
+	if (&t == this)
+		return true;
+
+	return parent_->IsDescendantOf(t);
+}
+
+double Tree::Dice(Tree& t2, Mappings& M)
+{
+	(void)t2;
+	(void)M;
+
+	return 0;
+}
+
+Tree::optref Tree::Candidate(Tree& t1, Mappings& M)
+{
+	Tree::vecref candidates = FindAll(*this, [&](Tree& c) {
+		if (t1.value_ != c.value_)
+			return false;
+		if (M.ContainsMappingSecond(c))
+			return false;
+
+		if (!std::any_of(
+			M.begin(), M.end(), [&](Mappings::treepair& pair) {
+				std::cout << pair.first.get().GetValue()
+					  << " child of " << t1.GetValue()
+					  << "?\n";
+				return pair.first.get().IsDescendantOf(t1)
+				    && pair.second.get().IsDescendantOf(c);
+			}))
+			return false;
+
+		return true;
+	});
+
+	std::cout << "Candidates size " << candidates.size() << '\n';
+
+	if (candidates.size() == 0)
+		return std::nullopt;
+
+	auto it = std::max_element(
+	    candidates.begin(), candidates.end(), [&](Tree& c1, Tree& c2) {
+		    return t1.Dice(c1, M) < t1.Dice(c2, M);
+	    });
+
+	return *it;
 }

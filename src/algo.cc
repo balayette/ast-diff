@@ -180,10 +180,10 @@ Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
 	std::sort(data.Candidates.begin(), data.Candidates.end(),
 		  [&](Mappings::treepair& a, Mappings::treepair& b) {
-			  return dice(a.first.get().GetParent(),
-				      a.second.get().GetParent())
-			      < dice(b.first.get().GetParent(),
-				     b.second.get().GetParent());
+			  return a.first.get().GetParent().Dice(
+				     a.second.get().GetParent(), data.Map)
+			      < b.first.get().GetParent().Dice(
+				    b.second.get().GetParent(), data.Map);
 		  });
 
 	while (data.Candidates.size() > 0)
@@ -201,4 +201,46 @@ Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 	}
 
 	return data.Map;
+}
+
+void bottomUp(Tree& t1, Tree& T2, Mappings& M)
+{
+	for (auto& child : t1.GetChildren())
+		bottomUp(*child, T2, M);
+
+	std::cout << "bottom up on " << t1.GetValue() << '\n';
+	if (t1.GetChildren().size() > 0)
+	{
+		// FIXME: Add mindice, when dice is implemented.
+		auto t2 = T2.Candidate(t1, M);
+		if (t2 == std::nullopt)
+		{
+			std::cout << "Didnt find a candidate.\n";
+			return;
+		}
+		std::cout << "Foud a candidate " << t2->get().GetValue()
+			  << '\n';
+
+		M.AddMapping(t1, t2->get());
+	} else
+	{
+		std::cout << "No children, not running\n";
+	}
+}
+
+void BottomUp(Tree& T1, Tree& T2, Mappings& M)
+{
+	auto& children = T1.GetChildren();
+	if (!M.ContainsMappingFirst(T1)
+	    && std::any_of(children.begin(), children.end(),
+			   [&](Tree::ptr& child) {
+				   return M.ContainsMappingFirst(*child);
+			   }))
+	{
+		bottomUp(T1, T2, M);
+	} else
+	{
+		for (auto& child : children)
+			bottomUp(*child, T2, M);
+	}
 }
