@@ -20,7 +20,8 @@ Tree::vecref Heap::Pop()
 	Tree::vecref ret;
 
 	for (int max = heap_.top().get().GetHeight();
-	     heap_.size() > 0 && heap_.top().get().GetHeight() == max; heap_.pop())
+	     heap_.size() > 0 && heap_.top().get().GetHeight() == max;
+	     heap_.pop())
 		ret.push_back(heap_.top());
 
 	return ret;

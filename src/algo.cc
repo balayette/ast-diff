@@ -19,8 +19,9 @@ struct GumtreeData
 
 	int MinHeight;
 
-	inline GumtreeData(Tree& src, Tree& dst) : SourceTree(src), DestTree(dst)
-	{};
+	inline GumtreeData(Tree& src, Tree& dst)
+	    : SourceTree(src)
+	    , DestTree(dst){};
 };
 
 void differentHeights(GumtreeData& data)
@@ -177,12 +178,13 @@ Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 	}
 
 	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
-	std::sort(
-	    data.Candidates.begin(), data.Candidates.end(),
-	    [&](Mappings::treepair& a, Mappings::treepair& b) {
-		    return dice(a.first.get().GetParent(), a.second.get().GetParent())
-			< dice(b.first.get().GetParent(), b.second.get().GetParent());
-	    });
+	std::sort(data.Candidates.begin(), data.Candidates.end(),
+		  [&](Mappings::treepair& a, Mappings::treepair& b) {
+			  return dice(a.first.get().GetParent(),
+				      a.second.get().GetParent())
+			      < dice(b.first.get().GetParent(),
+				     b.second.get().GetParent());
+		  });
 
 	while (data.Candidates.size() > 0)
 	{
@@ -193,10 +195,10 @@ Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 		std::remove_if(data.Candidates.begin(), data.Candidates.end(),
 			       [&](auto& p) {
 				       return p.first.get() == pair.first.get()
-					   || p.second.get() == pair.second.get();
+					   || p.second.get()
+					   == pair.second.get();
 			       });
 	}
 
 	return data.Map;
 }
-

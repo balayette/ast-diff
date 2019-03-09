@@ -1,14 +1,14 @@
 #pragma once
 
+#include <functional>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-#include <functional>
-#include <optional>
 
-#include "symbol.hh"
 #include "mappings.hh"
+#include "symbol.hh"
 
 class Tree
 {
@@ -56,6 +56,7 @@ class Tree
 
 	bool operator==(const Tree& t);
 	bool operator!=(const Tree& t);
+
     private:
 	Symbol value_;
 	vecptr children_;
