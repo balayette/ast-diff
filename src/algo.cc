@@ -169,10 +169,10 @@ Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 	std::cout << "Data candidates size " << data.Candidates.size() << '\n';
 	std::sort(data.Candidates.begin(), data.Candidates.end(),
 		  [&](Mappings::treepair& a, Mappings::treepair& b) {
-			  return a.first.get().GetParent().Dice(
-				     a.second.get().GetParent(), data.Map)
-			      < b.first.get().GetParent().Dice(
-				    b.second.get().GetParent(), data.Map);
+			  return a.first.get().GetParent()->get().Dice(
+				     *(a.second.get().GetParent()), data.Map)
+			      < b.first.get().GetParent()->get().Dice(
+				    *(b.second.get().GetParent()), data.Map);
 		  });
 
 	while (data.Candidates.size() > 0)

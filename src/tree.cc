@@ -89,8 +89,11 @@ int Tree::GetHeight()
 	return height_;
 }
 
-Tree& Tree::GetParent()
+Tree::optref Tree::GetParent()
 {
+	if (!parent_)
+		return std::nullopt;
+
 	return *parent_;
 }
 

@@ -38,7 +38,7 @@ class Tree
 	int GetHeight();
 	int ComputeHeightDepth();
 
-	Tree& GetParent();
+	optref GetParent();
 	void SetParent(Tree& p);
 
 	std::ostream& PrettyPrint(std::ostream& stream);
