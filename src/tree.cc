@@ -243,10 +243,25 @@ bool Tree::IsDescendantOf(Tree& t)
 
 double Tree::Dice(Tree& t2, Mappings& M)
 {
-	(void)t2;
-	(void)M;
+	std::cout << "Computing dice between " << value_ << " "  << height_ << " and "
+		  << t2.value_ << " " << t2.height_;
+	auto desc1 = GetDescendants(*this);
+	auto desc2 = GetDescendants(t2);
 
-	return 0;
+	double d = desc1.size() + desc2.size();
+
+	int u = 0;
+	for (auto& desc : desc1)
+	{
+		if (M.ContainsMappingFirst(desc))
+			u++;
+	}
+
+	double ret = (double)(2*u) / d;
+
+	std::cout << " = " << ret << "\n";
+
+	return ret;
 }
 
 Tree::optref Tree::Candidate(Tree& t1, Mappings& M)

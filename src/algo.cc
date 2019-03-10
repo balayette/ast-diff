@@ -147,17 +147,6 @@ void sameHeights(GumtreeData& data)
 		doOpenT2(data, t2);
 }
 
-double dice(Tree& t1, Tree& t2)
-{
-	auto des1 = GetDescendants(t1);
-	auto des2 = GetDescendants(t2);
-
-	double c = (double)common_elements(des1.begin(), des1.end(),
-					   des2.begin(), des2.end());
-
-	return (2.0 * c) / ((double)des1.size() + (double)des2.size());
-}
-
 Mappings Gumtree(Tree& SourceTree, Tree& DestTree)
 {
 	GumtreeData data(SourceTree, DestTree);
