@@ -1,3 +1,4 @@
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -8,25 +9,27 @@
 #include "lexer.hh"
 #include "parser.hh"
 
-int main(int argc, char* argv[])
+void usage()
 {
-	if (argc < 3)
-	{
-		std::cerr << "usage: ast-diffing FILENAME1 FILENAME2\n";
-		std::exit(1);
-	}
+	std::cerr << "usage: ast-diffing --diff FILENAME1 FILENAME2\n";
+	std::cerr << "usage: ast-diffing --pretty-sexp FILENAME1 "
+		     "FILENAME2...\n";
+	std::exit(1);
+}
 
-	std::ifstream f1(argv[1]);
+void diff(char* file1, char* file2)
+{
+	std::ifstream f1(file1);
 	if (!f1)
 	{
-		std::cerr << "Couldn't open file " << argv[1] << '\n';
+		std::cerr << "Couldn't open file " << file1 << '\n';
 		std::exit(2);
 	}
 
-	std::ifstream f2(argv[2]);
+	std::ifstream f2(file2);
 	if (!f2)
 	{
-		std::cerr << "Couldn't open file " << argv[2] << '\n';
+		std::cerr << "Couldn't open file " << file2 << '\n';
 		std::exit(2);
 	}
 
@@ -61,4 +64,57 @@ int main(int argc, char* argv[])
 	BottomUp(*ret, *ret2, mapping);
 	std::ofstream map("map.dot");
 	DumpMapping(map, *ret, *ret2, mapping);
+}
+
+void do_pretty(std::istream& f)
+{
+	if (!f)
+	{
+		std::cerr << "Couldn't open file \n";
+		std::exit(2);
+	}
+
+	Lexer l(f);
+	Parser p(l);
+
+	auto ret = p.Parse();
+	ret->ComputeHeightDepth();
+
+	ret->PrettyPrint(std::cout) << '\n';
+}
+
+void pretty(int nbr, char* files[])
+{
+	for (int i = 0; i < nbr; i++)
+	{
+		if (strcmp(files[i], "-") == 0)
+		{
+			do_pretty(std::cin);
+		} else
+		{
+			std::ifstream s(files[i]);
+			do_pretty(s);
+		}
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 2)
+		usage();
+
+	if (strcmp(argv[1], "--diff") == 0)
+	{
+		if (argc != 4)
+			usage();
+
+		diff(argv[2], argv[3]);
+	} else if (strcmp(argv[1], "--pretty-sexp") == 0)
+	{
+		if (argc < 3)
+			usage();
+
+		pretty(argc - 2, argv + 2);
+	} else
+		usage();
 }
