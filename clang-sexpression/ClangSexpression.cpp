@@ -23,6 +23,10 @@ using namespace clang;
   case Decl::Kind::X:                                                          \
     return Visit##X((X##Decl *)decl);
 
+#define TRANSPARENT_STMT(X)                                                    \
+  case Stmt::StmtClass::X##Class:                                              \
+    return VisitTransparentStmt(stmt);
+
 #define IGNORE_DECL(X)                                                         \
   case Decl::Kind::X:                                                          \
     return;
@@ -45,6 +49,8 @@ public:
 
     llvm::outs() << ')';
   }
+
+  void VisitTransparentStmt(Stmt *stmt) { RECURSE_CHILDREN_STMT(stmt); }
 
   void VisitDecl(Decl *decl) {
     llvm::outs() << '(' << decl->getDeclKindName() << ' ';
@@ -88,6 +94,39 @@ public:
     llvm::outs() << ')';
   }
 
+  void VisitRecord(RecordDecl *rd) {
+    llvm::outs() << "(Record " << rd->getNameAsString() << ' ';
+    for (auto *field : rd->fields())
+      DispatchDecl(field);
+    llvm::outs() << ')';
+  }
+
+  void VisitField(FieldDecl *fd) {
+    llvm::outs() << '(' << fd->getNameAsString() << ' ';
+    printType(fd->getType());
+    llvm::outs() << ')';
+  }
+
+  void VisitEnum(EnumDecl *ed) {
+    llvm::outs() << "(Enum " << ed->getNameAsString();
+    for (auto *field : ed->enumerators())
+      DispatchDecl(field);
+    llvm::outs() << ')';
+  }
+
+  void VisitEnumConstant(EnumConstantDecl *ecd) {
+    llvm::outs() << '(' << ecd->getNameAsString() << ' '
+                 << ecd->getInitVal().getExtValue() << ')';
+  }
+
+  void VisitVar(VarDecl *vd)
+  {
+    llvm::outs() << "(VarDecl " << vd->getNameAsString() << ' ';
+    DispatchStmt(vd->getInit());
+    printType(vd->getType());
+    llvm::outs() << ')';
+  }
+
   void DispatchDecl(Decl *decl) {
     if (!decl)
       return;
@@ -105,6 +144,11 @@ public:
       DISPATCH_DECL(Function)
       DISPATCH_DECL(FunctionTemplate)
       DISPATCH_DECL(Typedef)
+      DISPATCH_DECL(Record)
+      DISPATCH_DECL(Field)
+      DISPATCH_DECL(Enum)
+      DISPATCH_DECL(EnumConstant)
+      DISPATCH_DECL(Var)
       IGNORE_DECL(LinkageSpec)
     default:
       return VisitDecl(decl);
@@ -122,9 +166,18 @@ public:
       DISPATCH_STMT(StringLiteral)
       DISPATCH_STMT(DeclStmt)
       DISPATCH_STMT(DeclRefExpr)
+      DISPATCH_STMT(MemberExpr)
+      TRANSPARENT_STMT(ParenExpr)
+      TRANSPARENT_STMT(ImplicitCastExpr)
     default:
       return VisitStmt(stmt);
     }
+  }
+
+  void VisitMemberExpr(MemberExpr *me) {
+    llvm::outs() << "(MemberExpr ";
+    RECURSE_CHILDREN_STMT(me);
+    llvm::outs() << me->getMemberDecl()->getNameAsString() << ')';
   }
 
   void VisitDeclStmt(DeclStmt *stmt) {
@@ -156,7 +209,7 @@ public:
   }
 
   void VisitDeclRefExpr(DeclRefExpr *ref) {
-    llvm::outs() << "(DeclRefExpr " << ref->getDecl()->getNameAsString() << ')';
+    llvm::outs() << '(' << ref->getDecl()->getNameAsString() << ')';
   }
 
   void VisitUnaryOperator(UnaryOperator *op) {
