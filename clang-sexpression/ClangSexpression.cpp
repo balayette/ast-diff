@@ -16,9 +16,15 @@ using namespace clang::tooling;
 using namespace llvm;
 using namespace clang;
 
-#define DISPATCH(X)                                                            \
+#define DISPATCH_STMT(X)                                                       \
   case Stmt::StmtClass::X##Class:                                              \
     return Visit##X((X *)stmt);
+
+#define RECURSE_CHILDREN_STMT(X)                                               \
+  do {                                                                         \
+    for (auto it : X->children())                                              \
+      DispatchStmt(it);                                                        \
+  } while (0)
 
 class SexpVisitor {
 public:
@@ -44,11 +50,11 @@ public:
     if (!stmt)
       return;
     switch (stmt->getStmtClass()) {
-      DISPATCH(BinaryOperator)
-      DISPATCH(UnaryOperator)
-      DISPATCH(IntegerLiteral)
-      DISPATCH(DeclStmt)
-      DISPATCH(DeclRefExpr)
+      DISPATCH_STMT(BinaryOperator)
+      DISPATCH_STMT(UnaryOperator)
+      DISPATCH_STMT(IntegerLiteral)
+      DISPATCH_STMT(DeclStmt)
+      DISPATCH_STMT(DeclRefExpr)
     default:
       return VisitStmt(stmt);
     }
@@ -56,12 +62,14 @@ public:
 
   void VisitDeclStmt(DeclStmt *stmt) {
     if (stmt->isSingleDecl()) {
-      llvm::outs()
-          << "(DeclStmt ";
-      if (auto *named = dyn_cast<NamedDecl>(stmt->getSingleDecl()))
-	llvm::outs() << named->getNameAsString();
+      llvm::outs() << "(DeclStmt ";
+      if (auto *var = dyn_cast<VarDecl>(stmt->getSingleDecl()))
+        llvm::outs() << var->getNameAsString() << ' '
+                     << var->getType().getAsString();
       else
-	llvm::outs() << stmt->getSingleDecl()->getDeclKindName();
+        llvm::outs() << stmt->getSingleDecl()->getDeclKindName();
+
+      RECURSE_CHILDREN_STMT(stmt);
 
       llvm::outs() << ')';
     }
@@ -94,8 +102,9 @@ public:
 
   void VisitStmt(Stmt *stmt) {
     llvm::outs() << '(' << stmt->getStmtClassName();
-    for (auto child : stmt->children())
-      DispatchStmt(child);
+
+    RECURSE_CHILDREN_STMT(stmt);
+
     llvm::outs() << ')';
   }
 };
