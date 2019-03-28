@@ -23,6 +23,10 @@ using namespace clang;
   case Decl::Kind::X:                                                          \
     return Visit##X((X##Decl *)decl);
 
+#define IGNORE_DECL(X)                                                         \
+  case Decl::Kind::X:                                                          \
+    return;
+
 #define RECURSE_CHILDREN_STMT(X)                                               \
   do {                                                                         \
     for (auto it : X->children())                                              \
@@ -52,14 +56,35 @@ public:
   }
 
   void VisitFunction(FunctionDecl *f) {
+    if (!f->hasBody())
+      return;
+
     llvm::outs() << "(Function " << f->getNameAsString() << ' ';
 
     printType(f->getType());
     for (auto param : f->parameters())
-      VisitDeclStmt((DeclStmt *)param);
+      VisitParmVarDecl((ParmVarDecl *)param);
 
     DispatchStmt(f->getBody());
 
+    llvm::outs() << ')';
+  }
+
+  void VisitFunctionTemplate(FunctionTemplateDecl *ft) {
+    llvm::outs() << "(FunctionTemplate " << ft->getNameAsString() << ' ';
+    VisitFunction(ft->getTemplatedDecl());
+    llvm::outs() << ')';
+  }
+
+  void VisitParmVarDecl(ParmVarDecl *p) {
+    llvm::outs() << "(ParmVarDecl " << p->getNameAsString() << ' ';
+    printType(p->getType());
+    llvm::outs() << ')';
+  }
+
+  void VisitTypedef(TypedefDecl *td) {
+    llvm::outs() << "(Typedef " << td->getNameAsString() << ' ';
+    printType(td->getUnderlyingType());
     llvm::outs() << ')';
   }
 
@@ -67,8 +92,20 @@ public:
     if (!decl)
       return;
 
+    if (!decl->getLocation().isValid())
+      return;
+
+    if (_sourceManager->isInSystemMacro(decl->getLocation()))
+      return;
+
+    if (_sourceManager->isInSystemHeader(decl->getLocation()))
+      return;
+
     switch (decl->getKind()) {
       DISPATCH_DECL(Function)
+      DISPATCH_DECL(FunctionTemplate)
+      DISPATCH_DECL(Typedef)
+      IGNORE_DECL(LinkageSpec)
     default:
       return VisitDecl(decl);
     }
@@ -77,6 +114,7 @@ public:
   void DispatchStmt(Stmt *stmt) {
     if (!stmt)
       return;
+
     switch (stmt->getStmtClass()) {
       DISPATCH_STMT(BinaryOperator)
       DISPATCH_STMT(UnaryOperator)
@@ -144,16 +182,22 @@ public:
 
     llvm::outs() << ')';
   }
+
+  void setSourceManager(SourceManager *SM) { _sourceManager = SM; }
+
+private:
+  SourceManager *_sourceManager;
 };
 
 class SexpConsumer : public ASTConsumer {
 public:
   virtual void HandleTranslationUnit(ASTContext &Context) {
-    Visitor.VisitTranslationUnit(Context.getTranslationUnitDecl());
+    _visitor.setSourceManager(&Context.getSourceManager());
+    _visitor.VisitTranslationUnit(Context.getTranslationUnitDecl());
   }
 
 private:
-  SexpVisitor Visitor;
+  SexpVisitor _visitor;
 };
 
 class SexpAction : public ASTFrontendAction {
