@@ -13,7 +13,6 @@
 #include <utility>
 
 using namespace clang::tooling;
-using namespace llvm;
 using namespace clang;
 
 #define DISPATCH_STMT(X)                                                       \
@@ -82,6 +81,7 @@ public:
       DISPATCH_STMT(BinaryOperator)
       DISPATCH_STMT(UnaryOperator)
       DISPATCH_STMT(IntegerLiteral)
+      DISPATCH_STMT(StringLiteral)
       DISPATCH_STMT(DeclStmt)
       DISPATCH_STMT(DeclRefExpr)
     default:
@@ -108,6 +108,12 @@ public:
     llvm::outs() << "(IntegerLiteral " << i->getValue().getLimitedValue()
                  << ' ';
     printType(i->getType());
+    llvm::outs() << ")";
+  }
+
+  void VisitStringLiteral(StringLiteral *s) {
+    llvm::outs() << "(StringLiteral ";
+    s->outputString(llvm::outs());
     llvm::outs() << ")";
   }
 
@@ -167,10 +173,10 @@ static llvm::cl::OptionCategory ClangSexpCategory("clang-sexpression options");
 // CommonOptionsParser declares HelpMessage with a description of the common
 // command-line options related to the compilation database and input files.
 // It's nice to have this help message in all tools.
-static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
+static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 
 // A help message for this specific tool can be added afterwards.
-static cl::extrahelp
+static llvm::cl::extrahelp
     MoreHelp("\nThis tool converts clang ASTs to S-Expressions\n");
 
 int main(int argc, const char **argv) {
