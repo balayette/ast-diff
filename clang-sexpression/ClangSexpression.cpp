@@ -17,11 +17,11 @@ using namespace clang;
 
 #define DISPATCH_STMT(X)                                                       \
   case Stmt::StmtClass::X##Class:                                              \
-    return Visit##X((X *)stmt);
+    return Visit##X((const X *)stmt);
 
 #define DISPATCH_DECL(X)                                                       \
   case Decl::Kind::X:                                                          \
-    return Visit##X((X##Decl *)decl);
+    return Visit##X((const X##Decl *)decl);
 
 #define TRANSPARENT_STMT(X)                                                    \
   case Stmt::StmtClass::X##Class:                                              \
@@ -33,7 +33,7 @@ using namespace clang;
 
 #define RECURSE_CHILDREN_STMT(X)                                               \
   do {                                                                         \
-    for (auto it : X->children())                                              \
+    for (const auto *it : X->children())                                       \
       DispatchStmt(it);                                                        \
   } while (0)
 
@@ -41,7 +41,7 @@ void printType(QualType t) { llvm::outs() << "\"" << t.getAsString() << "\""; }
 
 class SexpVisitor {
 public:
-  void VisitTranslationUnit(TranslationUnitDecl *tu) {
+  void VisitTranslationUnit(const TranslationUnitDecl *tu) {
     llvm::outs() << '(' << tu->Decl::getDeclKindName();
 
     for (auto dec : tu->decls())
@@ -50,9 +50,14 @@ public:
     llvm::outs() << ')';
   }
 
-  void VisitTransparentStmt(Stmt *stmt) { RECURSE_CHILDREN_STMT(stmt); }
+  void test(const ReturnStmt *s)
+  {
+    RECURSE_CHILDREN_STMT(s);
+  }
 
-  void VisitDecl(Decl *decl) {
+  void VisitTransparentStmt(const Stmt *stmt) { RECURSE_CHILDREN_STMT(stmt); }
+
+  void VisitDecl(const Decl *decl) {
     llvm::outs() << '(' << decl->getDeclKindName() << ' ';
 
     if (decl->hasBody())
@@ -61,7 +66,7 @@ public:
     llvm::outs() << ')';
   }
 
-  void VisitFunction(FunctionDecl *f) {
+  void VisitFunction(const FunctionDecl *f) {
     if (!f->hasBody())
       return;
 
@@ -76,58 +81,57 @@ public:
     llvm::outs() << ')';
   }
 
-  void VisitFunctionTemplate(FunctionTemplateDecl *ft) {
+  void VisitFunctionTemplate(const FunctionTemplateDecl *ft) {
     llvm::outs() << "(FunctionTemplate " << ft->getNameAsString() << ' ';
     VisitFunction(ft->getTemplatedDecl());
     llvm::outs() << ')';
   }
 
-  void VisitParmVarDecl(ParmVarDecl *p) {
+  void VisitParmVarDecl(const ParmVarDecl *p) {
     llvm::outs() << "(ParmVarDecl " << p->getNameAsString() << ' ';
     printType(p->getType());
     llvm::outs() << ')';
   }
 
-  void VisitTypedef(TypedefDecl *td) {
+  void VisitTypedef(const TypedefDecl *td) {
     llvm::outs() << "(Typedef " << td->getNameAsString() << ' ';
     printType(td->getUnderlyingType());
     llvm::outs() << ')';
   }
 
-  void VisitRecord(RecordDecl *rd) {
+  void VisitRecord(const RecordDecl *rd) {
     llvm::outs() << "(Record " << rd->getNameAsString() << ' ';
     for (auto *field : rd->fields())
       DispatchDecl(field);
     llvm::outs() << ')';
   }
 
-  void VisitField(FieldDecl *fd) {
+  void VisitField(const FieldDecl *fd) {
     llvm::outs() << '(' << fd->getNameAsString() << ' ';
     printType(fd->getType());
     llvm::outs() << ')';
   }
 
-  void VisitEnum(EnumDecl *ed) {
+  void VisitEnum(const EnumDecl *ed) {
     llvm::outs() << "(Enum " << ed->getNameAsString();
     for (auto *field : ed->enumerators())
       DispatchDecl(field);
     llvm::outs() << ')';
   }
 
-  void VisitEnumConstant(EnumConstantDecl *ecd) {
+  void VisitEnumConstant(const EnumConstantDecl *ecd) {
     llvm::outs() << '(' << ecd->getNameAsString() << ' '
                  << ecd->getInitVal().getExtValue() << ')';
   }
 
-  void VisitVar(VarDecl *vd)
-  {
+  void VisitVar(const VarDecl *vd) {
     llvm::outs() << "(VarDecl " << vd->getNameAsString() << ' ';
     DispatchStmt(vd->getInit());
     printType(vd->getType());
     llvm::outs() << ')';
   }
 
-  void DispatchDecl(Decl *decl) {
+  void DispatchDecl(const Decl *decl) {
     if (!decl)
       return;
 
@@ -155,7 +159,13 @@ public:
     }
   }
 
-  void DispatchStmt(Stmt *stmt) {
+  void VisitSwitchStmt(const SwitchStmt *ss) {
+    llvm::outs() << "(SwitchStmt ";
+    RECURSE_CHILDREN_STMT(ss);
+    llvm::outs() << ')';
+  }
+
+  void DispatchStmt(const Stmt *stmt) {
     if (!stmt)
       return;
 
@@ -167,6 +177,7 @@ public:
       DISPATCH_STMT(DeclStmt)
       DISPATCH_STMT(DeclRefExpr)
       DISPATCH_STMT(MemberExpr)
+      DISPATCH_STMT(SwitchStmt)
       TRANSPARENT_STMT(ParenExpr)
       TRANSPARENT_STMT(ImplicitCastExpr)
     default:
@@ -174,52 +185,49 @@ public:
     }
   }
 
-  void VisitMemberExpr(MemberExpr *me) {
+  void VisitMemberExpr(const MemberExpr *me) {
     llvm::outs() << "(MemberExpr ";
     RECURSE_CHILDREN_STMT(me);
     llvm::outs() << me->getMemberDecl()->getNameAsString() << ')';
   }
 
-  void VisitDeclStmt(DeclStmt *stmt) {
+  void VisitDeclStmt(const DeclStmt *stmt) {
     if (stmt->isSingleDecl()) {
       llvm::outs() << "(DeclStmt ";
-      if (auto *var = dyn_cast<VarDecl>(stmt->getSingleDecl())) {
-        llvm::outs() << var->getNameAsString() << ' ';
-        printType(var->getType());
-      } else
+      if (auto *var = dyn_cast<VarDecl>(stmt->getSingleDecl()))
+        DispatchDecl(var);
+      else
         llvm::outs() << stmt->getSingleDecl()->getDeclKindName();
-
-      RECURSE_CHILDREN_STMT(stmt);
 
       llvm::outs() << ')';
     }
   }
 
-  void VisitIntegerLiteral(IntegerLiteral *i) {
+  void VisitIntegerLiteral(const IntegerLiteral *i) {
     llvm::outs() << "(IntegerLiteral " << i->getValue().getLimitedValue()
                  << ' ';
     printType(i->getType());
     llvm::outs() << ")";
   }
 
-  void VisitStringLiteral(StringLiteral *s) {
+  void VisitStringLiteral(const StringLiteral *s) {
     llvm::outs() << "(StringLiteral ";
     s->outputString(llvm::outs());
     llvm::outs() << ")";
   }
 
-  void VisitDeclRefExpr(DeclRefExpr *ref) {
+  void VisitDeclRefExpr(const DeclRefExpr *ref) {
     llvm::outs() << '(' << ref->getDecl()->getNameAsString() << ')';
   }
 
-  void VisitUnaryOperator(UnaryOperator *op) {
+  void VisitUnaryOperator(const UnaryOperator *op) {
     llvm::outs() << "(UnaryOperator "
                  << UnaryOperator::getOpcodeStr(op->getOpcode()).data();
     DispatchStmt(op->getSubExpr());
     llvm::outs() << ')';
   }
 
-  void VisitBinaryOperator(BinaryOperator *op) {
+  void VisitBinaryOperator(const BinaryOperator *op) {
     llvm::outs() << "(BinaryOperator " << op->getOpcodeStr().data() << ' ';
 
     DispatchStmt(op->getLHS());
@@ -228,7 +236,7 @@ public:
     llvm::outs() << ')';
   }
 
-  void VisitStmt(Stmt *stmt) {
+  void VisitStmt(const Stmt *stmt) {
     llvm::outs() << '(' << stmt->getStmtClassName();
 
     RECURSE_CHILDREN_STMT(stmt);
