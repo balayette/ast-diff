@@ -20,9 +20,4 @@ Use cases:
 Related:
 * A Feasibility Study of Using Automated Program Repair for Introductory Programming Assignments
 
-Building clang-sexpression:
-
-$ ln -s $PWD/clang-sexpression $PATH_TO_LLVM_PROJECT/clang-tools-extra/clang-sexpression
-$ echo 'add_subdirectory(clang-sexpression)' >> $PATH_TO_LLVM_PROJECT/clang-tools-extra/CMakeLists.txt
-
-Make sure that your enabled the clang-tools-extra project when you ran cmake in the llvm project.
+A clang-based tool to generate C/C++ s-expressions : https://github.com/d1adev/clang-sexpression
