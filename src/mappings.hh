@@ -5,30 +5,29 @@
 
 class Tree;
 
-class Mappings
-{
-    public:
-	using treeptr = std::reference_wrapper<Tree>;
-	using treepair = std::pair<treeptr, treeptr>;
-	using mapping_store = std::vector<treepair>;
-	using mapping_iterator = mapping_store::iterator;
+class Mappings {
+public:
+  using treeptr = std::reference_wrapper<Tree>;
+  using treepair = std::pair<treeptr, treeptr>;
+  using mapping_store = std::vector<treepair>;
+  using mapping_iterator = mapping_store::iterator;
 
-	void AddMapping(treeptr t1, treeptr t2);
+  void AddMapping(treeptr t1, treeptr t2);
 
-	bool ContainsMapping(treeptr t1, treeptr t2);
+  bool ContainsMapping(treeptr t1, treeptr t2);
 
-	bool ContainsMappingFirst(treeptr t);
-	bool ContainsMappingSecond(treeptr t);
+  bool ContainsMappingFirst(treeptr t);
+  bool ContainsMappingSecond(treeptr t);
 
-	int size();
+  int size();
 
-	mapping_iterator begin();
-	mapping_iterator end();
+  mapping_iterator begin();
+  mapping_iterator end();
 
-	treepair& operator[](const int idx);
+  treepair &operator[](const int idx);
 
-	mapping_iterator erase(mapping_iterator position);
+  mapping_iterator erase(mapping_iterator position);
 
-    private:
-	mapping_store mappings_;
+private:
+  mapping_store mappings_;
 };

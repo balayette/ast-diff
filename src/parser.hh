@@ -6,13 +6,12 @@
 #include "token.hh"
 #include "tree.hh"
 
-class Parser
-{
-    public:
-	Parser(Lexer& lexer);
+class Parser {
+public:
+  Parser(Lexer &lexer);
 
-	Tree::ptr Parse();
+  Tree::ptr Parse();
 
-    private:
-	Lexer& lexer_;
+private:
+  Lexer &lexer_;
 };
