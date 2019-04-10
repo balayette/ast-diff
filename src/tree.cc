@@ -116,9 +116,6 @@ bool Tree::IsIsomorphic(Tree &t) {
   if (value_ != t.value_)
     return false;
 
-  if (children_.size() == 0)
-    return true;
-
   for (size_t i = 0; i < children_.size(); i++) {
     auto found = std::find_if(
         t.children_.begin(), t.children_.end(),
@@ -195,7 +192,7 @@ double Tree::Dice(Tree &t2, Mappings &M) {
 
   int u = 0;
   for (auto &desc : desc1) {
-    if (M.ContainsMappingFirst(desc))
+    if (M.ContainsSourceMapping(desc))
       u++;
   }
 
@@ -210,7 +207,7 @@ Tree::optref Tree::Candidate(Tree &t1, Mappings &M) {
   Tree::vecref candidates = FindAll(*this, [&](Tree &c) {
     if (t1.value_ != c.value_)
       return false;
-    if (M.ContainsMappingSecond(c))
+    if (M.ContainsDestinationMapping(c))
       return false;
 
     if (!std::any_of(M.begin(), M.end(), [&](Mappings::treepair &pair) {

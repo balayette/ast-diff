@@ -15,12 +15,12 @@ bool Mappings::ContainsMapping(treeptr t1, treeptr t2) {
   });
 }
 
-bool Mappings::ContainsMappingFirst(treeptr t) {
+bool Mappings::ContainsSourceMapping(treeptr t) {
   return std::any_of(mappings_.begin(), mappings_.end(),
                      [&](const auto &p) { return &p.first.get() == &t.get(); });
 }
 
-bool Mappings::ContainsMappingSecond(treeptr t) {
+bool Mappings::ContainsDestinationMapping(treeptr t) {
   return std::any_of(mappings_.begin(), mappings_.end(), [&](const auto &p) {
     return &p.second.get() == &t.get();
   });

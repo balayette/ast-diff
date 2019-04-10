@@ -11,6 +11,11 @@ void foreach_pair(Iterator b1, Iterator e1, Iterator b2, Iterator e2, Func f) {
   }
 }
 
+template <typename Container, typename Func>
+void foreach_pair(Container &i1, Container &i2, Func f) {
+  foreach_pair(i1.begin(), i1.end(), i2.begin(), i2.end(), f);
+}
+
 template <typename Iterator>
 int common_elements(Iterator b1, Iterator e1, Iterator b2, Iterator e2) {
   int ret = 0;

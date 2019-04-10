@@ -16,8 +16,8 @@ public:
 
   bool ContainsMapping(treeptr t1, treeptr t2);
 
-  bool ContainsMappingFirst(treeptr t);
-  bool ContainsMappingSecond(treeptr t);
+  bool ContainsSourceMapping(treeptr t);
+  bool ContainsDestinationMapping(treeptr t);
 
   int size();
 
