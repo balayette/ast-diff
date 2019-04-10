@@ -49,16 +49,15 @@ void diff(char *file1, char *file2) {
   ret->DumpDot(out1);
   ret2->DumpDot(out2);
 
-  auto mapping = Gumtree(*ret, *ret2);
+  auto mapping = Gumtree(ret.get(), ret2.get());
 
   for (auto &it : mapping) {
-    std::cout << it.first.get().GetValue() << " mapped to "
-              << it.second.get().GetValue() << '\n';
+    std::cout << it.first->GetValue() << " mapped to "
+              << it.second->GetValue() << '\n';
   }
 
-  BottomUp(*ret, *ret2, mapping);
   std::ofstream map("map.dot");
-  DumpMapping(map, *ret, *ret2, mapping);
+  DumpMapping(map, ret.get(), ret2.get(), mapping);
 }
 
 void do_pretty(std::istream &f) {

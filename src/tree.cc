@@ -9,7 +9,7 @@ Tree::Tree(std::string &value)
   idx_ = node_count_++;
 }
 
-void Tree::AddChild(Tree::ptr &tree) { children_.push_back(tree); }
+void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
 
 std::ostream &Tree::Print(std::ostream &stream) {
   stream << '(' << value_;
@@ -45,7 +45,7 @@ std::ostream &Tree::PrettyPrint(std::ostream &stream) {
 
 size_t Tree::ChildrenSize() { return children_.size(); }
 
-Tree::vecptr &Tree::GetChildren() { return children_; }
+Tree::vecsptr &Tree::GetChildren() { return children_; }
 
 void Tree::SetValue(std::string &value) { value_ = value; }
 
@@ -55,20 +55,16 @@ void Tree::SetHeight(int height) { height_ = height; }
 
 int Tree::GetHeight() { return height_; }
 
-Tree::optref Tree::GetParent() {
-  if (!parent_)
-    return std::nullopt;
+Tree *Tree::GetParent() { return parent_; }
 
-  return *parent_;
-}
-
-void Tree::SetParent(Tree &p) { parent_ = &p; }
+void Tree::SetParent(Tree *p) { parent_ = p; }
 
 int Tree::computeHeightDepth(int depth, Tree *parent) {
   depth_ = depth;
   auto max = 0;
-  for (auto it = children_.begin(); it != children_.end(); it++) {
-    auto h = (*it)->computeHeightDepth(depth + 1, this);
+
+  for (auto &it : children_) {
+    auto h = it->computeHeightDepth(depth + 1, this);
     if (h > max)
       max = h;
   }
@@ -106,86 +102,77 @@ std::ostream &Tree::DumpDot(std::ostream &stream) {
   return stream << "}\n";
 }
 
-bool Tree::IsIsomorphic(Tree &t) {
-  if (height_ != t.height_)
+bool Tree::IsIsomorphic(Tree *t) {
+  if (height_ != t->height_)
     return false;
 
-  if (children_.size() != t.children_.size())
+  if (children_.size() != t->children_.size())
     return false;
 
-  if (value_ != t.value_)
+  if (value_ != t->value_)
     return false;
 
   for (size_t i = 0; i < children_.size(); i++) {
     auto found = std::find_if(
-        t.children_.begin(), t.children_.end(),
-        [&](Tree::ptr &elem) { return elem->value_ == children_[i]->value_; });
+        t->children_.begin(), t->children_.end(),
+        [&](Tree::sptr &elem) { return elem->value_ == children_[i]->value_; });
 
-    if (found == t.children_.end())
+    if (found == t->children_.end())
       return false;
 
-    if (!children_[i]->IsIsomorphic(**found))
+    if (!children_[i]->IsIsomorphic((*found).get()))
       return false;
   }
 
   return true;
 }
 
-void getDescendants(Tree &t, Tree::vecref &v) {
-  auto &children = t.GetChildren();
+void getDescendants(Tree *t, Tree::vecptr &v) {
+  auto &children = t->GetChildren();
   for (const auto &child : children)
-    v.push_back(*child);
+    v.push_back(child.get());
 
   for (auto &it : children)
-    getDescendants(*it, v);
+    getDescendants(it.get(), v);
 }
 
-Tree::vecref GetDescendants(Tree &t) {
-  Tree::vecref v;
+Tree::vecptr GetDescendants(Tree *t) {
+  Tree::vecptr v;
 
   getDescendants(t, v);
 
   return v;
 }
 
-void DumpMapping(std::ostream &stream, Tree &t1, Tree &t2, Mappings &v) {
+void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   stream << "digraph G {\n\tsubgraph AST1 {\n";
-  t1.dumpDot(stream);
+  t1->dumpDot(stream);
   stream << "}\n\tsubgraph AST2 {\n";
-  t2.dumpDot(stream);
+  t2->dumpDot(stream);
   stream << "}\n";
 
   for (auto p : v)
-    stream << p.first.get().idx_ << " -> " << p.second.get().idx_
+    stream << p.first->idx_ << " -> " << p.second->idx_
            << " [fillcolor = blue] [color = blue] [style = dashed] "
               "[constraint = false];\n";
 
   stream << "}\n";
 }
 
-bool Tree::operator==(const Tree &t) { return this == &t; }
-
-bool Tree::operator!=(const Tree &t) { return this != &t; }
-
-bool operator==(std::reference_wrapper<Tree> a,
-                std::reference_wrapper<Tree> b) {
-  return &a == &b;
-}
-
-bool Tree::IsDescendantOf(Tree &t) {
+bool Tree::IsDescendantOf(Tree *t) {
   if (!parent_)
     return false;
 
-  if (&t == this)
+  if (t == this)
     return true;
 
   return parent_->IsDescendantOf(t);
 }
 
-double Tree::Dice(Tree &t2, Mappings &M) {
+double Tree::Dice(Tree *t2, Mappings &M) {
   std::cout << "Computing dice between " << value_ << " " << height_ << " and "
-            << t2.value_ << " " << t2.height_;
-  auto desc1 = GetDescendants(*this);
+            << t2->value_ << " " << t2->height_;
+  auto desc1 = GetDescendants(this);
   auto desc2 = GetDescendants(t2);
 
   double d = desc1.size() + desc2.size();
@@ -203,18 +190,18 @@ double Tree::Dice(Tree &t2, Mappings &M) {
   return ret;
 }
 
-Tree::optref Tree::Candidate(Tree &t1, Mappings &M) {
-  Tree::vecref candidates = FindAll(*this, [&](Tree &c) {
-    if (t1.value_ != c.value_)
+Tree *Tree::Candidate(Tree *t1, Mappings &M) {
+  Tree::vecptr candidates = FindAll(this, [&](Tree *c) {
+    if (t1->value_ != c->value_)
       return false;
     if (M.ContainsDestinationMapping(c))
       return false;
 
     if (!std::any_of(M.begin(), M.end(), [&](Mappings::treepair &pair) {
-          std::cout << pair.first.get().GetValue() << " child of "
-                    << t1.GetValue() << "?\n";
-          return pair.first.get().IsDescendantOf(t1) &&
-                 pair.second.get().IsDescendantOf(c);
+          std::cout << pair.first->GetValue() << " child of " << t1->GetValue()
+                    << "?\n";
+          return pair.first->IsDescendantOf(t1) &&
+                 pair.second->IsDescendantOf(c);
         }))
       return false;
 
@@ -224,11 +211,11 @@ Tree::optref Tree::Candidate(Tree &t1, Mappings &M) {
   std::cout << "Candidates size " << candidates.size() << '\n';
 
   if (candidates.size() == 0)
-    return std::nullopt;
+    return nullptr;
 
   auto it = std::max_element(
       candidates.begin(), candidates.end(),
-      [&](Tree &c1, Tree &c2) { return t1.Dice(c1, M) < t1.Dice(c2, M); });
+      [&](Tree *c1, Tree *c2) { return t1->Dice(c1, M) < t1->Dice(c2, M); });
 
   return *it;
 }

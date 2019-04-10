@@ -1,46 +1,46 @@
 #include "tree.hh"
 
 template <typename Func> void Tree::PreorderTraversal(Func f) {
-  f(*this);
+  f(this);
 
-  for (auto &it : children_)
+  for (auto *it : children_)
     it->PreorderTraversal(f);
 }
 
 template <typename Func> void Tree::PostorderTraversal(Func f) {
-  for (auto &it : children_)
+  for (auto *it : children_)
     it->PreorderTraversal(f);
 
-  f(*this);
+  f(this);
 }
 
-template <typename Pred> Tree::optref FindIf(Tree &t, Pred f) {
+template <typename Pred> Tree *FindIf(Tree *t, Pred f) {
   if (f(t))
     return t;
 
-  auto &children = t.GetChildren();
+  auto &children = t->GetChildren();
   if (children.size() == 0)
-    return std::nullopt;
+    return nullptr;
 
-  for (const auto &it : children) {
-    auto r = FindIf(*it, f);
-    if (r != std::nullopt)
+  for (auto *it : children) {
+    auto *r = FindIf(it, f);
+    if (r)
       return r;
   }
 
-  return std::nullopt;
+  return nullptr;
 }
 
-template <typename Pred> void findAll(Tree &t, Pred f, Tree::vecref &v) {
+template <typename Pred> void findAll(Tree *t, Pred f, Tree::vecptr v) {
   if (f(t))
     v.push_back(t);
 
-  for (auto &it : t.GetChildren())
-    findAll(*it, f, v);
+  for (auto &it : t->GetChildren())
+    findAll(it.get(), f, v);
 }
 
-template <typename Pred> Tree::vecref FindAll(Tree &t, Pred f) {
-  Tree::vecref v;
+template <typename Pred> Tree::vecptr FindAll(Tree *t, Pred f) {
+  Tree::vecptr v;
 
   findAll(t, f, v);
 

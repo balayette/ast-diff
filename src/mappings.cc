@@ -11,18 +11,18 @@ void Mappings::AddMapping(treeptr t1, treeptr t2) {
 
 bool Mappings::ContainsMapping(treeptr t1, treeptr t2) {
   return std::any_of(mappings_.begin(), mappings_.end(), [&](const auto &p) {
-    return &p.first.get() == &t1.get() && &p.second.get() == &t2.get();
+    return p.first == t1 && p.second == t2;
   });
 }
 
 bool Mappings::ContainsSourceMapping(treeptr t) {
   return std::any_of(mappings_.begin(), mappings_.end(),
-                     [&](const auto &p) { return &p.first.get() == &t.get(); });
+                     [&](const auto &p) { return p.first == t; });
 }
 
 bool Mappings::ContainsDestinationMapping(treeptr t) {
   return std::any_of(mappings_.begin(), mappings_.end(), [&](const auto &p) {
-    return &p.second.get() == &t.get();
+    return p.second == t;
   });
 }
 

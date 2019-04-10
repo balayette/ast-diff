@@ -7,7 +7,7 @@ class Tree;
 
 class Mappings {
 public:
-  using treeptr = std::reference_wrapper<Tree>;
+  using treeptr = Tree *;
   using treepair = std::pair<treeptr, treeptr>;
   using mapping_store = std::vector<treepair>;
   using mapping_iterator = mapping_store::iterator;

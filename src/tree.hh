@@ -12,23 +12,20 @@
 
 class Tree {
 public:
-  using ptr = std::shared_ptr<Tree>;
-  using vecptr = std::vector<std::shared_ptr<Tree>>;
-  using opt = std::optional<Tree>;
-  using refwrap = std::reference_wrapper<Tree>;
-  using optref = std::optional<refwrap>;
-  using vecref = std::vector<refwrap>;
-  using pair = std::pair<ptr, ptr>;
+  using sptr = std::shared_ptr<Tree>;
+  using vecsptr = std::vector<sptr>;
+  using vecptr = std::vector<Tree *>;
+  using pair = std::pair<Tree *, Tree *>;
   using vecpair = std::vector<pair>;
 
   Tree();
   Tree(std::string &value);
 
-  void AddChild(Tree::ptr &tree);
+  void AddChild(Tree::sptr &tree);
   std::ostream &Print(std::ostream &stream);
 
   size_t ChildrenSize();
-  vecptr &GetChildren();
+  vecsptr &GetChildren();
 
   void SetValue(std::string &value);
   Symbol &GetValue();
@@ -37,8 +34,8 @@ public:
   int GetHeight();
   int ComputeHeightDepth();
 
-  optref GetParent();
-  void SetParent(Tree &p);
+  Tree *GetParent();
+  void SetParent(Tree *p);
 
   std::ostream &PrettyPrint(std::ostream &stream);
   std::ostream &DumpDot(std::ostream &stream);
@@ -47,23 +44,20 @@ public:
 
   template <typename Func> void PostorderTraversal(Func f);
 
-  bool IsIsomorphic(Tree &t);
+  bool IsIsomorphic(Tree *t);
 
-  Tree::optref Candidate(Tree &t1, Mappings &M);
+  Tree *Candidate(Tree *t1, Mappings &M);
 
-  bool IsDescendantOf(Tree &t);
+  bool IsDescendantOf(Tree *t);
 
-  double Dice(Tree &t2, Mappings &M);
+  double Dice(Tree *t2, Mappings &M);
 
-  friend void DumpMapping(std::ostream &stream, Tree &t1, Tree &t2,
+  friend void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2,
                           Mappings &v);
-
-  bool operator==(const Tree &t);
-  bool operator!=(const Tree &t);
 
 private:
   Symbol value_;
-  vecptr children_;
+  vecsptr children_;
   Tree *parent_;
 
   inline static int node_count_ = 0;
@@ -76,12 +70,10 @@ private:
   void dumpDot(std::ostream &stream);
 };
 
-Tree::vecref GetDescendants(Tree &t);
+Tree::vecptr GetDescendants(Tree *t);
 
-template <typename Pred> Tree::optref FindIf(Tree &t, Pred f);
+template <typename Pred> Tree *FindIf(Tree &t, Pred f);
 
-template <typename Pred> Tree::vecref FindAll(Tree &t, Pred f);
-
-bool operator==(std::reference_wrapper<Tree> a, std::reference_wrapper<Tree> b);
+template <typename Pred> Tree::vecptr FindAll(Tree &t, Pred f);
 
 #include "tree.hxx"
