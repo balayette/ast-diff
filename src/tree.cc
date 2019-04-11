@@ -102,7 +102,22 @@ std::ostream &Tree::DumpDot(std::ostream &stream) {
   return stream << "}\n";
 }
 
+// Find an isomorphic child to `this` among the children of t.
+Tree* Tree::FindIsomorphicChild(Tree *t) {
+  for (auto &other : t->children_) {
+    if (IsIsomorphic(other.get())) {
+      return other.get();
+    }
+  }
+
+  return nullptr;
+}
+
 bool Tree::IsIsomorphic(Tree *t) {
+  auto found = iso_cache_.find(t);
+  if (found != iso_cache_.end())
+    return true;
+
   if (height_ != t->height_)
     return false;
 
@@ -112,18 +127,17 @@ bool Tree::IsIsomorphic(Tree *t) {
   if (value_ != t->value_)
     return false;
 
-  for (size_t i = 0; i < children_.size(); i++) {
-    auto found = std::find_if(
-        t->children_.begin(), t->children_.end(),
-        [&](Tree::sptr &elem) { return elem->value_ == children_[i]->value_; });
-
-    if (found == t->children_.end())
+  for (auto &me : children_) {
+    auto *iso = me->FindIsomorphicChild(t);
+    if (iso == nullptr)
       return false;
 
-    if (!children_[i]->IsIsomorphic((*found).get()))
-      return false;
+    iso_cache_.insert(iso);
+    iso->iso_cache_.insert(me.get());
   }
 
+  iso_cache_.insert(t);
+  t->iso_cache_.insert(this);
   return true;
 }
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "mappings.hh"
@@ -44,6 +45,7 @@ public:
 
   template <typename Func> void PostorderTraversal(Func f);
 
+  Tree *FindIsomorphicChild(Tree *t);
   bool IsIsomorphic(Tree *t);
 
   Tree *Candidate(Tree *t1, Mappings &M);
@@ -59,6 +61,8 @@ private:
   Symbol value_;
   vecsptr children_;
   Tree *parent_;
+
+  std::unordered_set<Tree *> iso_cache_;
 
   inline static int node_count_ = 0;
 
