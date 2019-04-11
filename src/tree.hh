@@ -48,11 +48,7 @@ public:
   Tree *FindIsomorphicChild(Tree *t);
   bool IsIsomorphic(Tree *t);
 
-  Tree *Candidate(Tree *t1, Mappings &M);
-
   bool IsDescendantOf(Tree *t);
-
-  double Dice(Tree *t2, Mappings &M);
 
   friend void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2,
                           Mappings &v);

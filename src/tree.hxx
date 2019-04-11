@@ -22,8 +22,8 @@ template <typename Pred> Tree *FindIf(Tree *t, Pred f) {
   if (children.size() == 0)
     return nullptr;
 
-  for (auto *it : children) {
-    auto *r = FindIf(it, f);
+  for (auto &it : children) {
+    auto *r = FindIf(it.get(), f);
     if (r)
       return r;
   }
