@@ -21,13 +21,21 @@ bool Mappings::ContainsSourceMapping(treeptr t) {
 }
 
 bool Mappings::ContainsDestinationMapping(treeptr t) {
-  return std::any_of(mappings_.begin(), mappings_.end(), [&](const auto &p) {
-    return p.second == t;
-  });
+  return std::any_of(mappings_.begin(), mappings_.end(),
+                     [&](const auto &p) { return p.second == t; });
 }
 
 Mappings::treepair &Mappings::operator[](const int idx) {
   return mappings_[idx];
+}
+
+Mappings::treeptr Mappings::GetDestination(treeptr t) {
+  auto found = find_if(mappings_.begin(), mappings_.end(),
+                       [&](const auto &p) { return p.first == t; });
+  if (found == mappings_.end())
+    return nullptr;
+
+  return (*found).second;
 }
 
 int Mappings::size() { return mappings_.size(); }

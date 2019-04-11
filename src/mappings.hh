@@ -19,6 +19,8 @@ public:
   bool ContainsSourceMapping(treeptr t);
   bool ContainsDestinationMapping(treeptr t);
 
+  treeptr GetDestination(treeptr t);
+
   int size();
 
   mapping_iterator begin();
