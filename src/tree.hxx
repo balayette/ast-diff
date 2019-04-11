@@ -3,13 +3,13 @@
 template <typename Func> void Tree::PreorderTraversal(Func f) {
   f(this);
 
-  for (auto *it : children_)
+  for (auto &it : children_)
     it->PreorderTraversal(f);
 }
 
 template <typename Func> void Tree::PostorderTraversal(Func f) {
-  for (auto *it : children_)
-    it->PreorderTraversal(f);
+  for (auto &it : children_)
+    it->PostorderTraversal(f);
 
   f(this);
 }
