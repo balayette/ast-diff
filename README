@@ -1,8 +1,21 @@
 Outline:
 
-The GUMTREE algorithm computes mappings from similar nodes of one tree
-to another.
-The output of the algorithm is then fed into the algorithm of [2].
+ast-diff is a tool that computes the difference between two trees.
+ast-diff can read trees from files or the standard input, in s-expression
+format.
+
+A clang-based tool to generate C/C++ s-expressions : https://github.com/d1adev/clang-sexpression
+
+ast-diff uses the Gumtree algorithm to compute mappings from nodes of a tree
+to nodes of another tree.
+
+Usage:
+
+42sh$ make
+42sh$ ./ast-diff --diff test/while.sexp test/for.sexp
+Similarity: 0.4242
+
+The similarity metric is contained in the [0, 1] interval.
 
 Papers:
 
@@ -19,5 +32,3 @@ Use cases:
 
 Related:
 * A Feasibility Study of Using Automated Program Repair for Introductory Programming Assignments
-
-A clang-based tool to generate C/C++ s-expressions : https://github.com/d1adev/clang-sexpression

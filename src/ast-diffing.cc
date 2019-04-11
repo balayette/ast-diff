@@ -40,9 +40,6 @@ void diff(char *file1, char *file2) {
   auto ret2 = p2.Parse();
   ret2->ComputeHeightDepth();
 
-  ret->PrettyPrint(std::cout) << '\n';
-  ret2->PrettyPrint(std::cout) << '\n';
-
   std::ofstream out1("out1.dot");
   std::ofstream out2("out2.dot");
 
@@ -50,11 +47,6 @@ void diff(char *file1, char *file2) {
   ret2->DumpDot(out2);
 
   auto mapping = Gumtree(ret.get(), ret2.get());
-
-  for (auto &it : mapping) {
-    std::cout << it.first->GetValue() << " mapped to "
-              << it.second->GetValue() << '\n';
-  }
 
   std::ofstream map("map.dot");
   DumpMapping(map, ret.get(), ret2.get(), mapping);
