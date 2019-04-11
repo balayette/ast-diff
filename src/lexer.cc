@@ -70,6 +70,8 @@ void Lexer::handleStart(char c) {
     break;
   case '"':
     state_ = STRING_LIT;
+    tok_ = MAKE_TOK(Token::ATOM);
+    tok_->SetString(std::string("\""));
     break;
   case ' ':
   case '\t':
@@ -81,62 +83,51 @@ void Lexer::handleStart(char c) {
     return;
   default:
     state_ = ATOM;
+    tok_ = MAKE_TOK(Token::ATOM);
+    tok_->SetString(std::string(""));
     rollback_ = true;
     break;
   }
 }
 
 void Lexer::handleAtom(char c) {
-  std::string str("");
-  str += c;
-
-  while ((c = nextChar()) != EOF) {
-    switch (c) {
-    case ' ':
-    case '(':
-    case ')':
-    case '\n':
-      state_ = START;
-      tok_ = MAKE_TOK(Token::ATOM);
-      tok_->SetString(str);
-      if (c == '(' || c == ')') {
-        rollback_ = true;
-        last_char_ = c;
-      }
-      return;
-    default:
-      str += c;
-      break;
+  switch (c) {
+  case ' ':
+  case '(':
+  case ')':
+  case '"':
+  case '\n':
+    state_ = START;
+    if (c == '(' || c == ')' || c == '"') {
+      rollback_ = true;
+      last_char_ = c;
     }
+    return;
+  default:
+    tok_->GetString().append(1, c);
+    break;
   }
 }
 
 void Lexer::handleStringLit(char c) {
-  std::string str("\"");
-  str += c;
-
-  while ((c = nextChar()) != EOF) {
-    switch (c) {
-    case '"':
-      str += '"';
-      state_ = START;
-      tok_ = MAKE_TOK(Token::ATOM);
-      tok_->SetString(str);
-      return;
-    case '\\':
-      c = nextChar();
-      if (c == EOF) {
-        std::cerr << "Unexpected EOF at line " << line_ << " char " << pos_
-                  << '\n';
-        std::exit(1);
-      }
-      if (c != '"')
-        str += '\\';
-      str += c;
-      break;
-    default:
-      str += c;
-      break;
+  switch (c) {
+  case '"':
+    state_ = START;
+    tok_->GetString().append(1, c);
+    return;
+  case '\\':
+    c = nextChar();
+    if (c == EOF) {
+      std::cerr << "Unexpected EOF at line " << line_ << " char " << pos_
+                << '\n';
+      std::exit(1);
     }
+    if (c != '"')
+      tok_->GetString().append(1, '\\');
+    tok_->GetString().append(1, c);
+    break;
+  default:
+    tok_->GetString().append(1, c);
+    break;
   }
 }

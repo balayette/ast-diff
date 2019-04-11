@@ -9,7 +9,7 @@ public:
 
   Token(TokenType type, int line, int pos);
 
-  void SetString(std::string &str);
+  void SetString(const std::string &str);
   std::string &GetString();
 
   TokenType GetType();

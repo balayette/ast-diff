@@ -5,7 +5,7 @@
 Token::Token(Token::TokenType type, int line, int pos)
     : type_(type), line_(line), pos_(pos) {}
 
-void Token::SetString(std::string &str) { str_ = str; }
+void Token::SetString(const std::string &str) { str_ = str; }
 
 std::string &Token::GetString() { return str_; }
 
