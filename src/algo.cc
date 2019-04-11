@@ -26,11 +26,14 @@ Mappings topDown(Tree *T1, Tree *T2) {
   for (auto min = std::min(L1.PeekMax(), L2.PeekMax());
        min != -1 && min > MIN_HEIGHT;
        min = std::min(L1.PeekMax(), L2.PeekMax())) {
-    if (L1.PeekMax() > L2.PeekMax()) {
+
+    auto m1 = L1.PeekMax();
+    auto m2 = L2.PeekMax();
+    if (m1 > m2) {
       for (auto t : L1.Pop())
         L1.Open(t);
     }
-    if (L1.PeekMax() < L2.PeekMax()) {
+    if (m1 < m2) {
       for (auto t : L2.Pop())
         L2.Open(t);
     }
@@ -46,6 +49,7 @@ Mappings topDown(Tree *T1, Tree *T2) {
       if (M.ContainsDestinationMapping(t2))
         return;
 
+      M.AddMapping(t1, t2);
       mapDescendants(t1, t2, M);
     });
 
@@ -77,7 +81,6 @@ double dice(Tree *t1, Tree *t2, Mappings &M) {
 
   double d = ((double)nbr * 2.0) /
              (GetDescendants(t1).size() + GetDescendants(t2).size());
-  std::cout << "D: " << d << '\n';
   return d;
 }
 
@@ -119,7 +122,6 @@ void bottomUp(Tree *T1, Tree *T2, Mappings &M) {
   for (auto *t1 : descendantsPost) {
     auto *t2 = candidate(t1, T2, M);
     if (!t2) {
-      std::cout << "Didn't find a candidate\n";
       continue;
     }
     M.AddMapping(t1, t2);
