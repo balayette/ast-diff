@@ -33,10 +33,12 @@ Mappings topDown(Tree *T1, Tree *T2) {
     if (m1 > m2) {
       for (auto t : L1.Pop())
         L1.Open(t);
+      continue;
     }
     if (m1 < m2) {
       for (auto t : L2.Pop())
         L2.Open(t);
+      continue;
     }
 
     auto H1 = L1.Pop();
