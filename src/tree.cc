@@ -2,12 +2,10 @@
 
 #include <algorithm>
 
-Tree::Tree() : value_(""), parent_(nullptr) { idx_ = node_count_++; }
+Tree::Tree() : value_(""), parent_(nullptr) {}
 
 Tree::Tree(std::string &value)
-    : value_(value), parent_(nullptr), height_(1), depth_(1) {
-  idx_ = node_count_++;
-}
+    : value_(value), parent_(nullptr), height_(1), depth_(1) {}
 
 void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
 
@@ -59,14 +57,15 @@ Tree *Tree::GetParent() { return parent_; }
 
 void Tree::SetParent(Tree *p) { parent_ = p; }
 
-int Tree::computeHeightDepth(int depth, Tree *parent) {
+int Tree::initTree(int depth, Tree *parent) {
   depth_ = depth;
   auto max = 0;
 
   for (auto &it : children_) {
-    auto h = it->computeHeightDepth(depth + 1, this);
-    if (h > max)
-      max = h;
+    auto h = it->initTree(depth + 1, this);
+    max = std::max(h, max);
+    left_desc_ = std::min(left_desc_, it->left_desc_);
+    right_desc_ = std::max(right_desc_, it->right_desc_);
   }
 
   height_ = max + 1;
@@ -74,7 +73,14 @@ int Tree::computeHeightDepth(int depth, Tree *parent) {
   return height_;
 }
 
-int Tree::ComputeHeightDepth() { return computeHeightDepth(0, nullptr); }
+int Tree::InitTree() {
+  PostorderTraversal([&](Tree *t) {
+    t->idx_ = node_count_++;
+    t->left_desc_ = t->idx_;
+    t->right_desc_ = t->idx_;
+  });
+  return initTree(0, nullptr);
+}
 
 void Tree::dumpDot(std::ostream &stream) {
   std::string out(value_.get());
@@ -103,7 +109,7 @@ std::ostream &Tree::DumpDot(std::ostream &stream) {
 }
 
 // Find an isomorphic child to `this` among the children of t.
-Tree* Tree::FindIsomorphicChild(Tree *t) {
+Tree *Tree::FindIsomorphicChild(Tree *t) {
   for (auto &other : t->children_) {
     if (IsIsomorphic(other.get())) {
       return other.get();
@@ -174,11 +180,5 @@ void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
 }
 
 bool Tree::IsDescendantOf(Tree *t) {
-  if (!parent_)
-    return false;
-
-  if (t == this)
-    return true;
-
-  return parent_->IsDescendantOf(t);
+  return idx_ >= t->left_desc_ && idx_ <= t->right_desc_;
 }

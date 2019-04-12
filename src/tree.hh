@@ -33,7 +33,7 @@ public:
 
   void SetHeight(int height);
   int GetHeight();
-  int ComputeHeightDepth();
+  int InitTree();
 
   Tree *GetParent();
   void SetParent(Tree *p);
@@ -65,8 +65,10 @@ private:
   int height_;
   int depth_;
   int idx_;
+  int left_desc_;
+  int right_desc_;
 
-  int computeHeightDepth(int depth, Tree *parent);
+  int initTree(int depth, Tree *parent);
   void dumpDot(std::ostream &stream);
 };
 

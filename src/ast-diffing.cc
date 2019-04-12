@@ -36,9 +36,9 @@ void diff(char *file1, char *file2) {
   Parser p2(l2);
 
   auto ret = p.Parse();
-  ret->ComputeHeightDepth();
+  ret->InitTree();
   auto ret2 = p2.Parse();
-  ret2->ComputeHeightDepth();
+  ret2->InitTree();
 
   std::ofstream out1("out1.dot");
   std::ofstream out2("out2.dot");
@@ -62,7 +62,7 @@ void do_pretty(std::istream &f) {
   Parser p(l);
 
   auto ret = p.Parse();
-  ret->ComputeHeightDepth();
+  ret->InitTree();
 
   ret->PrettyPrint(std::cout) << '\n';
 }
