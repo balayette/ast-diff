@@ -8,8 +8,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "mappings.hh"
 #include "symbol.hh"
+
+class Mappings;
 
 class Tree {
 public:
@@ -37,6 +38,11 @@ public:
 
   Tree *GetParent();
   void SetParent(Tree *p);
+
+  int GetIdx();
+
+  int GetLeftMostDesc();
+  int GetRightMostDesc();
 
   std::ostream &PrettyPrint(std::ostream &stream);
   std::ostream &DumpDot(std::ostream &stream);

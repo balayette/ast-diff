@@ -164,21 +164,11 @@ Tree::vecptr GetDescendants(Tree *t) {
   return v;
 }
 
-void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
-  stream << "digraph G {\n\tsubgraph AST1 {\n";
-  t1->dumpDot(stream);
-  stream << "}\n\tsubgraph AST2 {\n";
-  t2->dumpDot(stream);
-  stream << "}\n";
-
-  for (auto p : v)
-    stream << p.first->idx_ << " -> " << p.second->idx_
-           << " [fillcolor = blue] [color = blue] [style = dashed] "
-              "[constraint = false];\n";
-
-  stream << "}\n";
-}
-
 bool Tree::IsDescendantOf(Tree *t) {
   return idx_ >= t->left_desc_ && idx_ <= t->right_desc_;
 }
+
+int Tree::GetIdx() { return idx_; }
+
+int Tree::GetLeftMostDesc() { return left_desc_; }
+int Tree::GetRightMostDesc() { return right_desc_; }

@@ -3,14 +3,16 @@
 #include <memory>
 #include <vector>
 
-class Tree;
+#include <unordered_map>
+#include "tree.hh"
 
 class Mappings {
 public:
   using treeptr = Tree *;
-  using treepair = std::pair<treeptr, treeptr>;
-  using mapping_store = std::vector<treepair>;
+  using mapping_store = std::vector<treeptr>;
   using mapping_iterator = mapping_store::iterator;
+
+  Mappings(size_t nodeCountFirst, size_t nodeCountSecond);
 
   void AddMapping(treeptr t1, treeptr t2);
 
@@ -25,11 +27,8 @@ public:
 
   mapping_iterator begin();
   mapping_iterator end();
-
-  treepair &operator[](const int idx);
-
-  mapping_iterator erase(mapping_iterator position);
-
 private:
   mapping_store mappings_;
+  mapping_store destinations_;
+  int mapping_nbr_;
 };
