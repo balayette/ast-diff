@@ -6,7 +6,7 @@
 #include "heap.hh"
 #include "utils.hh"
 
-#define MIN_HEIGHT (1)
+#define MIN_HEIGHT (2)
 
 void mapDescendants(Tree *t1, Tree *t2, Mappings &M) {
   for (auto &child : t1->GetChildren()) {
@@ -135,11 +135,6 @@ void bottomUp(Tree *T1, Tree *T2, Mappings &M) {
 Mappings Gumtree(Tree *T1, Tree *T2) {
   auto mappings = topDown(T1, T2);
   bottomUp(T1, T2, mappings);
-  std::cout << "Similarity: "
-            << (2 * mappings.size() /
-                ((double)GetDescendants(T1).size() + 1 +
-                 GetDescendants(T2).size() + 1))
-            << '\n';
   return mappings;
 }
 

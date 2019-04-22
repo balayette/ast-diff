@@ -36,6 +36,31 @@ Mappings::mapping_iterator Mappings::begin() { return mappings_.begin(); }
 
 Mappings::mapping_iterator Mappings::end() { return mappings_.end(); }
 
+void dumpMapping2(std::ostream &stream, Tree *t1, Mappings &v) {
+  auto *dest = v.GetDestination(t1);
+  if (dest) {
+    stream << t1->GetIdx() << " -> " << dest->GetIdx()
+           << " [fillcolor = blue] [color = blue] [style = dashed] "
+              "[constraint = false];\n";
+    return;
+  }
+
+  for (auto &child : t1->GetChildren())
+    dumpMapping2(stream, child.get(), v);
+}
+
+void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
+  stream << "digraph G {\n\tsubgraph AST1 {\n";
+  t1->dumpDot(stream);
+  stream << "}\n\tsubgraph AST2 {\n";
+  t2->dumpDot(stream);
+  stream << "}\n";
+
+  dumpMapping2(stream, t1, v);
+
+  stream << '}';
+}
+
 void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   stream << "digraph G {\n\tsubgraph AST1 {\n";
   t1->dumpDot(stream);

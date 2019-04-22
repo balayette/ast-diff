@@ -6,7 +6,7 @@
 #define MAKE_TOK(Type) std::make_shared<Token>(Type, line_, pos_);
 
 Lexer::Lexer(std::istream &stream)
-    : stream_(stream), state_(START), rollback_(false), pos_(0), line_(0) {
+    : stream_(stream), state_(START), rollback_(false), pos_(0), line_(1) {
   Eat();
 }
 

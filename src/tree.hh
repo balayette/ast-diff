@@ -59,6 +59,9 @@ public:
   friend void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2,
                           Mappings &v);
 
+  friend void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2,
+                           Mappings &v);
+
 private:
   Symbol value_;
   vecsptr children_;

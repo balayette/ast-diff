@@ -32,3 +32,5 @@ private:
   mapping_store destinations_;
   int mapping_nbr_;
 };
+
+void DumpMapping2(std::ostream &stream, Tree *t1, Mappings &v);

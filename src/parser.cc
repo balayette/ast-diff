@@ -21,7 +21,8 @@ Tree::sptr Parser::Parse() {
       auto top = stack.top();
       stack.pop();
       if (stack.size() == 0) {
-        std::cerr << "Unexpected )\n";
+        std::cerr << "Unexpected ) at " << tok->GetLine() << ':'
+                  << tok->GetPos() << '\n';
         std::exit(2);
       }
 
