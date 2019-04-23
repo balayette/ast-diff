@@ -97,14 +97,14 @@ def process(cc_path):
                 continue
             if re.search(GLOB, path) and not re.search(EX_GLOB, path):
                 proc = subprocess.Popen(
-                    [SEXP, "-p", cc_path, path, "-dont-print-root=1"],
+                    [SEXP, "-p", cc_path, path, "-dont-print-root=1", "-o", path + ".sexp"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
-                out, err = proc.communicate()
+                if proc.wait() != 0:
+                    print("Couldn't create sexp for " + path)
+                    continue
                 # add return code check
-                with open(path + ".sexp", "wb") as f:
-                    f.write(out)
-                    ret.add(Sexp(path + ".sexp"))
+                ret.add(Sexp(path + ".sexp"))
 
     return Directory(cc_path, list(ret))
 
@@ -136,6 +136,15 @@ def sort_matches(matches):
     return sorted(matches, key=lambda x: -x[2])
 
 
+def dump_graph(matches):
+    with open("graph.dot", "w") as f:
+        f.write("graph G {\n")
+        for (f1, f2, sim) in matches:
+            f.write(f' "{f1}" -- "{f2}" [label="{sim}"];\n')
+
+        f.write("}") 
+
+
 def main(ccs):
     pool = Pool()
     log("Creating sexp files for all files.")
@@ -153,6 +162,8 @@ def main(ccs):
     for (f1, f2, d) in matches:
         print(f"{f1} {f2} {d}")
 
+
+    dump_graph(matches)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Find similar files.")
