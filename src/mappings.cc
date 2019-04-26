@@ -30,6 +30,10 @@ Mappings::treeptr Mappings::GetDestination(treeptr t) {
   return mappings_[t->GetIdx()];
 }
 
+Mappings::treeptr Mappings::GetSource(treeptr t) {
+  return destinations_[t->GetIdx() - mappings_.size()];
+}
+
 int Mappings::size() { return mapping_nbr_; }
 
 Mappings::mapping_iterator Mappings::begin() { return mappings_.begin(); }

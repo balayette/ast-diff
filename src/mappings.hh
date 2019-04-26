@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include <unordered_map>
 #include "tree.hh"
+#include <unordered_map>
 
 class Mappings {
 public:
@@ -22,11 +22,13 @@ public:
   bool ContainsDestinationMapping(treeptr t);
 
   treeptr GetDestination(treeptr t);
+  treeptr GetSource(treeptr t);
 
   int size();
 
   mapping_iterator begin();
   mapping_iterator end();
+
 private:
   mapping_store mappings_;
   mapping_store destinations_;
