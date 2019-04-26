@@ -1,5 +1,6 @@
 #include <cstring>
 #include <fstream>
+#include <getopt.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -10,14 +11,16 @@
 #include "parser.hh"
 
 void usage() {
-  std::cerr << "usage: ast-diffing --diff FILENAME1 FILENAME2 [FILENAME3 "
-               "FILENAME 4]\n";
-  std::cerr << "usage: ast-diffing --pretty-sexp FILENAME1 "
-               "[FILENAME3 ...]\n";
+  std::cerr << "ast-diffing --diff [--location-info extension] file...\n";
+  std::cerr << "extension is appended to all filenames to find the location "
+               "info file\n";
+  std::cerr << "ast-diffing --pretty-sexp file...\n";
+  std::cerr << "ast-diffing --pretty-sexp -\n";
+  std::cerr << "ast-diffing --help\n";
   std::exit(1);
 }
 
-double diff(char *file1, char *file2, bool dump) {
+double diff(char *file1, char *file2, bool dump, char *extension) {
   std::ifstream f1(file1);
   if (!f1) {
     std::cerr << "Couldn't open file " << file1 << '\n';
@@ -41,6 +44,20 @@ double diff(char *file1, char *file2, bool dump) {
   auto ret2 = p2.Parse();
   ret2->InitTree();
 
+  if (extension) {
+    std::ifstream loc1(std::string(file1).append(extension));
+    if (!loc1)
+      std::cerr << "Couldn't open location file for " << file1 << "\n";
+    else
+      ret->LoadLocation(loc1);
+
+    std::ifstream loc2(std::string(file2).append(extension));
+    if (!loc1)
+      std::cerr << "Couldn't open location file for " << file2 << "\n";
+    else
+      ret2->LoadLocation(loc2);
+  }
+
   if (dump) {
     std::ofstream out1("out1.dot");
     std::ofstream out2("out2.dot");
@@ -60,14 +77,14 @@ double diff(char *file1, char *file2, bool dump) {
            GetDescendants(ret2.get()).size() + 1));
 }
 
-void diff_all(int pairs, char **files) {
+void diff_all(int pairs, char **files, char *extension) {
   std::cout << "{\"results\":[";
   for (int i = 0; i < pairs; i++) {
     std::cout << "{\"file1\": \"" << files[2 * i] << "\",";
     std::cout << "\"file2\": \"" << files[2 * i + 1] << "\",";
-    std::cout << "\"similarity\": " 
-			<< diff(files[2 * i], files[2 * i + 1], pairs == 1)
-			<< "}";
+    std::cout << "\"similarity\": "
+              << diff(files[2 * i], files[2 * i + 1], pairs == 1, extension)
+              << "}";
     if (i != pairs - 1)
       std::cout << ",";
   }
@@ -104,16 +121,53 @@ int main(int argc, char *argv[]) {
   if (argc < 2)
     usage();
 
-  if (strcmp(argv[1], "--diff") == 0) {
-    if ((argc - 2) % 2 != 0)
-      usage();
+  int do_diff = true;
+  int help = false;
 
-    diff_all((argc - 2) / 2, argv + 2);
-  } else if (strcmp(argv[1], "--pretty-sexp") == 0) {
-    if (argc < 3)
-      usage();
+  char *extension = NULL;
 
-    pretty(argc - 2, argv + 2);
-  } else
+  struct option long_options[] = {{"diff", no_argument, &do_diff, true},
+                                  {"pretty-sexp", no_argument, &do_diff, false},
+                                  {"location-info", required_argument, 0, 0},
+                                  {"help", no_argument, &help, true}};
+
+  while (true) {
+    int option_index = 0;
+    int c = getopt_long(argc, argv, "", long_options, &option_index);
+
+    if (c == -1)
+      break;
+
+    switch (c) {
+    case 0:
+      if (optarg)
+        extension = optarg;
+      break;
+    default:
+      usage();
+      return 1;
+    }
+  }
+
+  if (help) {
     usage();
+    return 0;
+  }
+
+  if (argc - optind == 0) {
+    usage();
+    return 1;
+  }
+
+  if (do_diff) {
+    if ((argc - optind) % 2 != 0) {
+      std::cerr << "The number of files must be even.\n";
+      usage();
+      return 1;
+    }
+
+    diff_all((argc - optind) / 2, argv + optind, extension);
+  } else {
+    pretty(argc - optind, argv + optind);
+  }
 }
