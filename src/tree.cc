@@ -1,11 +1,13 @@
 #include "tree.hh"
 
 #include <algorithm>
+#include <string>
 
-Tree::Tree() : value_(""), parent_(nullptr) {}
+Tree::Tree() : value_(""), parent_(nullptr), location_info_("") {}
 
 Tree::Tree(std::string &value)
-    : value_(value), parent_(nullptr), height_(1), depth_(1) {}
+    : value_(value), parent_(nullptr), location_info_(""), height_(1),
+      depth_(1) {}
 
 void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
 
@@ -89,7 +91,8 @@ void Tree::dumpDot(std::ostream &stream) {
        f = out.find("\"", f + 2))
     out.replace(f, 1, "\\\"");
 
-  stream << '\t' << idx_ << " [label=\"" << out << "\"];\n";
+  stream << '\t' << idx_ << " [label=\"" << out << "\"] [tooltip=\""
+         << location_info_ << "\"];\n";
 
   for (auto &it : children_)
     stream << '\t' << idx_ << " -> " << it->idx_ << ";\n";
@@ -172,3 +175,9 @@ int Tree::GetIdx() { return idx_; }
 
 int Tree::GetLeftMostDesc() { return left_desc_; }
 int Tree::GetRightMostDesc() { return right_desc_; }
+
+void Tree::LoadLocation(std::istream &stream) {
+  PreorderTraversal([&](Tree *f) { std::getline(stream, f->location_info_); });
+}
+
+const std::string &Tree::GetLocationInfo() { return location_info_; }

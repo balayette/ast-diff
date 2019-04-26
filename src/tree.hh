@@ -36,6 +36,9 @@ public:
   int GetHeight();
   int InitTree();
 
+  void LoadLocation(std::istream &stream);
+  const std::string &GetLocationInfo();
+
   Tree *GetParent();
   void SetParent(Tree *p);
 
@@ -68,6 +71,8 @@ private:
   Tree *parent_;
 
   std::unordered_set<Tree *> iso_cache_;
+
+  std::string location_info_;
 
   inline static int node_count_ = 0;
 
