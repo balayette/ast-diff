@@ -96,10 +96,13 @@ def process(cc_path):
                 warn(f"File {path} of {cc_path} doesn't exist")
                 continue
             if re.search(GLOB, path) and not re.search(EX_GLOB, path):
-                proc = subprocess.Popen(
-                    [SEXP, "-p", cc_path, path, "-dont-print-root=1", "-o", path + ".sexp"],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
+                proc = subprocess.Popen([
+                    SEXP, "-p", cc_path, path, "-dont-print-root=1", "-o",
+                    path + ".sexp", "-debug-output",
+                    "-debug-o=" + path + ".sexp.loc"
+                ],
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
                 if proc.wait() != 0:
                     print("Couldn't create sexp for " + path)
                     continue
@@ -114,7 +117,7 @@ def diff(t):
 
     ret = []
 
-    args = [AST_DIFF, "--diff"]
+    args = [AST_DIFF, "--diff", "--location-info=.loc"]
     for f1, f2 in product(a.sexps, b.sexps):
         args.append(f1.path)
         args.append(f2.path)
@@ -142,7 +145,7 @@ def dump_graph(matches):
         for (f1, f2, sim) in matches:
             f.write(f' "{f1}" -- "{f2}" [label="{sim}"];\n')
 
-        f.write("}") 
+        f.write("}")
 
 
 def main(ccs):
@@ -162,8 +165,8 @@ def main(ccs):
     for (f1, f2, d) in matches:
         print(f"{f1} {f2} {d}")
 
-
     dump_graph(matches)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Find similar files.")
