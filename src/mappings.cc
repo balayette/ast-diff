@@ -65,6 +65,25 @@ void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   stream << '}';
 }
 
+void mappingsVec2(Tree *t1, Mappings &v, Tree::vecpair &ret) {
+  auto *dest = v.GetDestination(t1);
+  if (dest) {
+    ret.emplace_back(t1, dest);
+    return;
+  }
+
+  for (auto &child : t1->GetChildren())
+    mappingsVec2(child.get(), v, ret);
+}
+
+Tree::vecpair MappingsVec2(Tree *t1, Mappings &v) {
+  std::vector<std::pair<Tree *, Tree *>> ret;
+
+  mappingsVec2(t1, v, ret);
+
+  return ret;
+}
+
 void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   stream << "digraph G {\n\tsubgraph AST1 {\n";
   t1->dumpDot(stream);
