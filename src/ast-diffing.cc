@@ -72,19 +72,30 @@ double diff(char *file1, char *file2, bool dump, char *extension) {
     DumpMapping2(map, ret.get(), ret2.get(), mapping);
   }
 
-  return (2 * mapping.size() /
-          ((double)GetDescendants(ret.get()).size() + 1 +
-           GetDescendants(ret2.get()).size() + 1));
+  std::cout << "{\"file1\": \"" << file1 << "\",";
+  std::cout << "\"file2\": \"" << file2 << "\",";
+  std::cout << "\"similarity\": "
+            << (2 * mapping.size() /
+                ((double)GetDescendants(ret.get()).size() + 1 +
+                 GetDescendants(ret2.get()).size() + 1));
+  std::cout << ", \"mappings\": [\n";
+
+  auto vec = MappingsVec2(ret.get(), mapping);
+  for (size_t i = 0; i < vec.size(); i++) {
+    std::cout << "[\"" << vec[i].first->GetLocationInfo() << "\",";
+    std::cout << "\"" << vec[i].second->GetLocationInfo() << "\"]";
+    if (i != vec.size() - 1)
+      std::cout << ",\n";
+  }
+
+  std::cout << "]\n}";
+  return 1;
 }
 
 void diff_all(int pairs, char **files, char *extension) {
   std::cout << "{\"results\":[";
   for (int i = 0; i < pairs; i++) {
-    std::cout << "{\"file1\": \"" << files[2 * i] << "\",";
-    std::cout << "\"file2\": \"" << files[2 * i + 1] << "\",";
-    std::cout << "\"similarity\": "
-              << diff(files[2 * i], files[2 * i + 1], pairs == 1, extension)
-              << "}";
+    diff(files[2 * i], files[2 * i + 1], pairs == 1, extension);
     if (i != pairs - 1)
       std::cout << ",";
   }
