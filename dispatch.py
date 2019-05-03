@@ -175,7 +175,7 @@ if __name__ == '__main__':
                         type=float,
                         help='Minimum similarity to consider.')
     parser.add_argument('--ast-diff',
-                        default='./ast-diffing',
+                        default='./ast-diff',
                         type=str,
                         help='Path to the ast-diffing binary')
     parser.add_argument('--sexp',

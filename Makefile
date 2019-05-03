@@ -2,37 +2,55 @@ CXX ?= clang++
 CXXFLAGS = -Wall -Wextra -std=c++17 -pedantic -g -MMD
 LINK.o = $(LINK.cc)
 
-SRC = \
-	src/lexer.cc \
-	src/ast-diffing.cc \
-	src/token.cc \
-	src/parser.cc \
-	src/tree.cc \
-	src/symbol.cc \
-	src/heap.cc \
-	src/algo.cc \
-	src/mappings.cc \
+LIBOBJ = \
+	src/lexer.o \
+	src/token.o \
+	src/parser.o \
+	src/tree.o \
+	src/symbol.o \
+	src/heap.o \
+	src/algo.o \
+	src/mappings.o \
 
-OBJ = $(SRC:.cc=.o)
+DIFFOBJ = \
+	src/ast-diff.o \
+
+DISPATCHOBJ = \
+	src/dispatch.o \
+
+EXEOBJ = $(DIFFOBJ) $(DISPATCHOBJ)
+
+OBJ = $(LIBOBJ) $(EXEOBJ)
 
 DEP = $(OBJ:.o=.d)
+
+LIB = libast-diff.a
+DIFFEXE = ast-diff
+DISPATCHEXE = dispatch
+EXE = $(DIFFEXE) $(DISPATCHEXE)
 
 opti: CXXFLAGS += -O2
 opti: all
 
-all: ast-diffing
-
 debug: CXXFLAGS += -Og
 debug: all
 
-src/ast-diffing: $(OBJ)
+all: $(LIB) $(EXE)
 
-ast-diffing: src/ast-diffing
-	cp src/ast-diffing ast-diffing
+$(LIB): $(LIBOBJ)
+	$(AR) rcs $(LIB) $(LIBOBJ)
+
+src/ast-diff: $(LIB) $(DIFFOBJ)
+
+src/dispatch: $(LIB) $(DISPATCHOBJ)
+
+$(DIFFEXE): src/ast-diff
+	cp src/ast-diff $(DIFFEXE)
+
+$(DISPATCHEXE): src/dispatch
+	cp src/dispatch $(DISPATCHEXE)
 
 clean:
-	$(RM) $(OBJ) src/ast-diffing
-	$(RM) $(DEP)
-	$(RM) ast-diffing
+	$(RM) $(OBJ) $(EXE) $(LIB) $(DEP) src/ast-diff src/dispatch
 
 -include $(DEP)

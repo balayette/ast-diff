@@ -1,8 +1,12 @@
 *.pdf
 *.o
 *.d
-src/ast-diffing
-ast-diffing
+*.a
+src/ast-diff
+ast-diff
+src/dispatch
+dispatch
 tags
 *.png
 *.dot
+vgcore*
