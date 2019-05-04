@@ -79,7 +79,7 @@ void do_sexp(Directory *dir, char *cc_path) {
           .append(".sexp")
           .append(" -debug-output -debug-o=")
           .append(path)
-          .append(".sexp.loc");
+          .append(".sexp.loc > /dev/null 2>&1");
 
       if (std::system(cmd.c_str()) != 0) {
         std::cout << "Couldn't create sexp for " << path << '\n';
