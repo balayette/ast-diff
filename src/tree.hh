@@ -37,6 +37,7 @@ public:
   int InitTree();
 
   void LoadLocation(std::istream &stream);
+  void LoadLocation(const std::vector<std::string> &loc);
   const std::string &GetLocationInfo();
 
   Tree *GetParent();

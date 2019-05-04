@@ -123,9 +123,11 @@ Tree *Tree::FindIsomorphicChild(Tree *t) {
 }
 
 bool Tree::IsIsomorphic(Tree *t) {
-  auto found = iso_cache_.find(t);
-  if (found != iso_cache_.end())
-    return true;
+  /*
+auto found = iso_cache_.find(t);
+if (found != iso_cache_.end())
+return true;
+  */
 
   if (height_ != t->height_)
     return false;
@@ -141,12 +143,16 @@ bool Tree::IsIsomorphic(Tree *t) {
     if (iso == nullptr)
       return false;
 
-    iso_cache_.insert(iso);
-    iso->iso_cache_.insert(me.get());
+    /*
+iso_cache_.insert(iso);
+iso->iso_cache_.insert(me.get());
+    */
   }
 
-  iso_cache_.insert(t);
-  t->iso_cache_.insert(this);
+  /*
+iso_cache_.insert(t);
+t->iso_cache_.insert(this);
+  */
   return true;
 }
 
@@ -178,6 +184,11 @@ int Tree::GetRightMostDesc() { return right_desc_; }
 
 void Tree::LoadLocation(std::istream &stream) {
   PreorderTraversal([&](Tree *f) { std::getline(stream, f->location_info_); });
+}
+
+void Tree::LoadLocation(const std::vector<std::string> &loc) {
+  int idx = 0;
+  PreorderTraversal([&](Tree *t) { t->location_info_ = loc[idx++]; });
 }
 
 const std::string &Tree::GetLocationInfo() { return location_info_; }

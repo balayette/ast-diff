@@ -7,8 +7,11 @@
 #include <unordered_set>
 #include <vector>
 
-#include "vendor/ctpl.h"
-#include "vendor/json.hpp"
+#include "algo.hh"
+#include "cache.hh"
+#include "tree.hh"
+#include "vendor/ctpl.hh"
+#include "vendor/json.hh"
 
 using json = nlohmann::json;
 
@@ -30,7 +33,13 @@ template <> struct hash<Sexp> {
 
 struct Directory {
   char *cc_path;
-  std::unordered_set<Sexp> sexps;
+  std::vector<Sexp> sexps;
+};
+
+struct Match {
+  Sexp *file1;
+  Sexp *file2;
+  double similarity;
 };
 
 std::regex *glob = nullptr;
@@ -39,7 +48,26 @@ const char *sexp = "./clang-sexpression";
 float sim = 0.2;
 int jobs = 1;
 
+Cache *cache = new Cache();
+
 void usage() { std::cout << "Usage\n"; }
+
+int ncr(int n, int r) {
+  if (r == 0)
+    return 1;
+
+  if (r > n / 2)
+    return ncr(n, n - r);
+
+  long res = 1;
+
+  for (int k = 1; k <= r; ++k) {
+    res *= n - k + 1;
+    res /= k;
+  }
+
+  return res;
+}
 
 void do_sexp(Directory *dir, char *cc_path) {
   dir->cc_path = cc_path;
@@ -65,6 +93,10 @@ void do_sexp(Directory *dir, char *cc_path) {
       }
     }
 
+    if (std::any_of(dir->sexps.begin(), dir->sexps.end(),
+                    [&](Sexp &s) { return s.path == path.append(".sexp"); }))
+      continue;
+
     if ((!glob || std::regex_match(path, *glob)) &&
         !(ex_glob && std::regex_match(path, *ex_glob))) {
 
@@ -86,24 +118,73 @@ void do_sexp(Directory *dir, char *cc_path) {
         continue;
       }
 
-      dir->sexps.emplace(path.append(".sexp"));
+      dir->sexps.emplace_back(path.append(".sexp"));
+    }
+  }
+}
+
+void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
+  for (size_t i = 0; i < d1->sexps.size(); i++) {
+    for (size_t j = i; j < d2->sexps.size(); j++) {
+      auto [old1, t1] = cache->OpenAst(d1->sexps[i].path);
+      if (!old1) {
+        t1->InitTree();
+				std::string locpath = std::string(d1->sexps[i].path).append(".loc");
+				auto *loc = cache->OpenLocation(locpath);
+				if (!loc)
+					std::cerr << "Couldn't load location info for " << d1->sexps[i].path << '\n';
+				else
+					t1->LoadLocation(*loc);
+      }
+
+      auto [old2, t2] = cache->OpenAst(d2->sexps[i].path);
+      if (!old2) {
+        t2->InitTree();
+				std::string locpath = std::string(d2->sexps[i].path).append(".loc");
+        auto *loc = cache->OpenLocation(locpath);
+				if (!loc)
+					std::cerr << "Couldn't load location info for " << d2->sexps[i].path << '\n';
+				else
+					t2->LoadLocation(*loc);
+      }
+
+      auto mapping = Gumtree(t1.get(), t2.get());
+      std::cout << "ok\n";
     }
   }
 }
 
 void run(char *ccs[], int count) {
-  ctpl::thread_pool pool(std::min(count, jobs));
+  ctpl::thread_pool pool(jobs);
 
   std::vector<std::future<void>> results(count);
 
   std::vector<Directory> directories(count);
 
   for (int i = 0; i < count; i++)
-    results[i] = pool.push([&](int j) { do_sexp(&directories[j], ccs[i]); });
+    results[i] =
+        pool.push([=, &directories](int) { do_sexp(&directories[i], ccs[i]); });
 
   for (int i = 0; i < count; i++) {
     results[i].get();
     std::cout << (int)(((i + 1) / (float)count) * 100) << "%\n";
+  }
+
+  int combinations_nbr = ncr(count, 2);
+  pool.resize(std::min(jobs, combinations_nbr));
+  std::cout << combinations_nbr << " combinations.\n";
+
+  results.resize(combinations_nbr);
+  std::vector<std::vector<Match>> matches(combinations_nbr);
+
+  int idx = 0;
+  for (int i = 0; i < count; i++) {
+    for (int j = i + 1; j < count; j++) {
+      results[idx] = pool.push([=, &matches, &directories](int) {
+        do_diff(&matches[idx], &directories[i], &directories[j]);
+      });
+      idx++;
+    }
   }
 }
 
@@ -154,4 +235,5 @@ int main(int argc, char *argv[]) {
 
   delete glob;
   delete ex_glob;
+  delete cache;
 }

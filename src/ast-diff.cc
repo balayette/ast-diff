@@ -23,7 +23,7 @@ void usage() {
 double diff(char *file1, char *file2, bool dump, char *extension) {
   std::ifstream f1(file1);
   if (!f1) {
-    std::cerr << "Couldn't open file " << file1 << '\n';
+  std::cerr << "Couldn't open file " << file1 << '\n';
     std::exit(2);
   }
 
