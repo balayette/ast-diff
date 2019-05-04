@@ -11,11 +11,11 @@
 
 class Cache {
 public:
-  std::tuple<bool, Tree::sptr> OpenAst(const std::string &path);
-
-  const std::vector<std::string> *OpenLocation(const std::string &path);
+  Tree::sptr OpenAst(const std::string &path, bool location,
+                     const std::string &loc);
 
 private:
   std::unordered_map<std::string, Tree::sptr> trees;
-  std::unordered_map<std::string, std::vector<std::string>> locs;
+
+  std::mutex cache_lock_;
 };
