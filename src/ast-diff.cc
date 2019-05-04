@@ -23,7 +23,7 @@ void usage() {
 double diff(char *file1, char *file2, bool dump, char *extension) {
   std::ifstream f1(file1);
   if (!f1) {
-  std::cerr << "Couldn't open file " << file1 << '\n';
+    std::cerr << "Couldn't open file " << file1 << '\n';
     std::exit(2);
   }
 
@@ -74,10 +74,7 @@ double diff(char *file1, char *file2, bool dump, char *extension) {
 
   std::cout << "{\"file1\": \"" << file1 << "\",";
   std::cout << "\"file2\": \"" << file2 << "\",";
-  std::cout << "\"similarity\": "
-            << (2 * mapping.size() /
-                ((double)GetDescendants(ret.get()).size() + 1 +
-                 GetDescendants(ret2.get()).size() + 1));
+  std::cout << "\"similarity\": " << Similarity(ret.get(), ret2.get(), mapping);
   std::cout << ", \"mappings\": [\n";
 
   auto vec = MappingsVec2(ret.get(), mapping);

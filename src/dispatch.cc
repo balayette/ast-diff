@@ -37,6 +37,8 @@ struct Directory {
 };
 
 struct Match {
+  Match(Sexp *f1, Sexp *f2, double s) : file1(f1), file2(f2), similarity(s) {}
+
   Sexp *file1;
   Sexp *file2;
   double similarity;
@@ -76,6 +78,7 @@ void do_sexp(Directory *dir, char *cc_path) {
   if (!f)
     return;
 
+  std::cout << "opening " << cc_path << '\n';
   json cc;
   f >> cc;
 
@@ -94,7 +97,7 @@ void do_sexp(Directory *dir, char *cc_path) {
     }
 
     if (std::any_of(dir->sexps.begin(), dir->sexps.end(),
-                    [&](Sexp &s) { return s.path == path.append(".sexp"); }))
+                    [&](Sexp &s) { return s.path == path + ".sexp"; }))
       continue;
 
     if ((!glob || std::regex_match(path, *glob)) &&
@@ -126,30 +129,14 @@ void do_sexp(Directory *dir, char *cc_path) {
 void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
   for (size_t i = 0; i < d1->sexps.size(); i++) {
     for (size_t j = i; j < d2->sexps.size(); j++) {
-      auto [old1, t1] = cache->OpenAst(d1->sexps[i].path);
-      if (!old1) {
-        t1->InitTree();
-				std::string locpath = std::string(d1->sexps[i].path).append(".loc");
-				auto *loc = cache->OpenLocation(locpath);
-				if (!loc)
-					std::cerr << "Couldn't load location info for " << d1->sexps[i].path << '\n';
-				else
-					t1->LoadLocation(*loc);
-      }
-
-      auto [old2, t2] = cache->OpenAst(d2->sexps[i].path);
-      if (!old2) {
-        t2->InitTree();
-				std::string locpath = std::string(d2->sexps[i].path).append(".loc");
-        auto *loc = cache->OpenLocation(locpath);
-				if (!loc)
-					std::cerr << "Couldn't load location info for " << d2->sexps[i].path << '\n';
-				else
-					t2->LoadLocation(*loc);
-      }
+      auto t1 = cache->OpenAst(d1->sexps[i].path, true, ".loc");
+      auto t2 = cache->OpenAst(d2->sexps[i].path, true, ".loc");
 
       auto mapping = Gumtree(t1.get(), t2.get());
-      std::cout << "ok\n";
+      double s = Similarity(t1.get(), t2.get(), mapping);
+      if (s < sim)
+        continue;
+      matches->emplace_back(&d1->sexps[i], &d2->sexps[i], s);
     }
   }
 }
@@ -180,11 +167,16 @@ void run(char *ccs[], int count) {
   int idx = 0;
   for (int i = 0; i < count; i++) {
     for (int j = i + 1; j < count; j++) {
-      results[idx] = pool.push([=, &matches, &directories](int) {
+      results[idx] = pool.push([=, &directories, &matches](int) {
         do_diff(&matches[idx], &directories[i], &directories[j]);
       });
       idx++;
     }
+  }
+
+  for (int i = 0; i < combinations_nbr; i++) {
+    results[i].get();
+    std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\n";
   }
 }
 
@@ -231,9 +223,5 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  run(argv + optind - 1, argc - optind);
-
-  delete glob;
-  delete ex_glob;
-  delete cache;
+  run(argv + optind, argc - optind);
 }

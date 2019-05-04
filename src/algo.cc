@@ -138,3 +138,8 @@ Mappings Gumtree(Tree *T1, Tree *T2) {
   return mappings;
 }
 
+double Similarity(Tree *T1, Tree *T2, Mappings &mappings) {
+  return (
+      2 * mappings.size() /
+      ((double)GetDescendants(T1).size() + 1 + GetDescendants(T2).size() + 1));
+}
