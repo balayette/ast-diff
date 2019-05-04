@@ -1,8 +1,10 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -66,22 +68,25 @@ public:
   friend void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2,
                            Mappings &v);
 
+  friend std::ostream &operator<<(std::ostream &os, const Tree &tree);
+
 private:
   Symbol value_;
-  vecsptr children_;
   Tree *parent_;
-
-  std::unordered_set<Tree *> iso_cache_;
-
   std::string location_info_;
-
-  inline static int node_count_ = 0;
-
+  int tree_id_;
+  int idx_;
   int height_;
   int depth_;
-  int idx_;
   int left_desc_;
   int right_desc_;
+
+  std::mutex iso_lock_;
+
+  static inline std::atomic<int> tree_count_;
+
+  vecsptr children_;
+  std::unordered_set<Tree *> iso_cache_;
 
   int initTree(int depth, Tree *parent);
   void dumpDot(std::ostream &stream);

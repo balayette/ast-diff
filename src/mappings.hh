@@ -29,6 +29,9 @@ public:
   mapping_iterator begin();
   mapping_iterator end();
 
+  const mapping_store &GetMappingsStore();
+  const mapping_store &GetDestinationStore();
+
 private:
   mapping_store mappings_;
   mapping_store destinations_;

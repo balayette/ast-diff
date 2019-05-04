@@ -3,11 +3,12 @@
 #include <algorithm>
 #include <string>
 
-Tree::Tree() : value_(""), parent_(nullptr), location_info_("") {}
+Tree::Tree()
+    : value_(""), parent_(nullptr), location_info_(""),
+      tree_id_(tree_count_.fetch_add(1, std::memory_order_relaxed)), idx_(0),
+      height_(1), depth_(1), left_desc_(0), right_desc_(0) {}
 
-Tree::Tree(std::string &value)
-    : value_(value), parent_(nullptr), location_info_(""), height_(1),
-      depth_(1) {}
+Tree::Tree(std::string &value) : Tree() { value_ = value; }
 
 void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
 
@@ -76,8 +77,9 @@ int Tree::initTree(int depth, Tree *parent) {
 }
 
 int Tree::InitTree() {
+  int node_count = 0;
   PostorderTraversal([&](Tree *t) {
-    t->idx_ = node_count_++;
+    t->idx_ = node_count++;
     t->left_desc_ = t->idx_;
     t->right_desc_ = t->idx_;
   });
@@ -91,11 +93,11 @@ void Tree::dumpDot(std::ostream &stream) {
        f = out.find("\"", f + 2))
     out.replace(f, 1, "\\\"");
 
-  stream << '\t' << idx_ << " [label=\"" << out << "\"] [tooltip=\""
+  stream << "\t" << *this << " [label=\"" << out << "\"] [tooltip=\""
          << location_info_ << "\"];\n";
 
   for (auto &it : children_)
-    stream << '\t' << idx_ << " -> " << it->idx_ << ";\n";
+    stream << "\t" << *this << " -> " << *it << ";\n";
 
   stream << '\n';
 
@@ -123,11 +125,9 @@ Tree *Tree::FindIsomorphicChild(Tree *t) {
 }
 
 bool Tree::IsIsomorphic(Tree *t) {
-  /*
-auto found = iso_cache_.find(t);
-if (found != iso_cache_.end())
-return true;
-  */
+  auto found = iso_cache_.find(t);
+  if (found != iso_cache_.end())
+    return true;
 
   if (height_ != t->height_)
     return false;
@@ -143,16 +143,18 @@ return true;
     if (iso == nullptr)
       return false;
 
-    /*
-iso_cache_.insert(iso);
-iso->iso_cache_.insert(me.get());
-    */
+    {
+      std::lock_guard<std::mutex> lock(iso_lock_);
+      iso_cache_.insert(iso);
+      iso->iso_cache_.insert(me.get());
+    }
   }
 
-  /*
-iso_cache_.insert(t);
-t->iso_cache_.insert(this);
-  */
+  {
+    std::lock_guard<std::mutex> lock(iso_lock_);
+    iso_cache_.insert(t);
+    t->iso_cache_.insert(this);
+  }
   return true;
 }
 
@@ -192,3 +194,7 @@ void Tree::LoadLocation(const std::vector<std::string> &loc) {
 }
 
 const std::string &Tree::GetLocationInfo() { return location_info_; }
+
+std::ostream &operator<<(std::ostream &os, const Tree &tree) {
+  return os << '"' << tree.tree_id_ << '-' << tree.idx_ << '"';
+}

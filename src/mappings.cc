@@ -10,7 +10,7 @@ void Mappings::AddMapping(treeptr t1, treeptr t2) {
   if (mappings_[t1->GetIdx()] != nullptr)
     return;
   mappings_[t1->GetIdx()] = t2;
-  destinations_[t2->GetIdx() - mappings_.size()] = t1;
+  destinations_[t2->GetIdx()] = t1;
   mapping_nbr_++;
 }
 
@@ -23,7 +23,7 @@ bool Mappings::ContainsSourceMapping(treeptr t) {
 }
 
 bool Mappings::ContainsDestinationMapping(treeptr t) {
-  return destinations_[t->GetIdx() - mappings_.size()] != nullptr;
+  return destinations_[t->GetIdx()] != nullptr;
 }
 
 Mappings::treeptr Mappings::GetDestination(treeptr t) {
@@ -31,7 +31,7 @@ Mappings::treeptr Mappings::GetDestination(treeptr t) {
 }
 
 Mappings::treeptr Mappings::GetSource(treeptr t) {
-  return destinations_[t->GetIdx() - mappings_.size()];
+  return destinations_[t->GetIdx()];
 }
 
 int Mappings::size() { return mapping_nbr_; }
@@ -43,7 +43,7 @@ Mappings::mapping_iterator Mappings::end() { return mappings_.end(); }
 void dumpMapping2(std::ostream &stream, Tree *t1, Mappings &v) {
   auto *dest = v.GetDestination(t1);
   if (dest) {
-    stream << t1->GetIdx() << " -> " << dest->GetIdx()
+    stream << *t1 << " -> " << *dest
            << " [fillcolor = blue] [color = blue] [style = dashed] "
               "[constraint = false];\n";
     return;
@@ -95,10 +95,18 @@ void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   for (auto it = v.begin(); it != v.end(); it++, idx++) {
     if (*it == nullptr)
       continue;
-    stream << idx << " -> " << (*it)->GetIdx()
+    stream << *(v.GetMappingsStore()[idx]) << " -> " << *it
            << " [fillcolor = blue] [color = blue] [style = dashed] "
               "[constraint = false];\n";
   }
 
   stream << "}\n";
+}
+
+const Mappings::mapping_store &Mappings::GetMappingsStore() {
+  return mappings_;
+}
+
+const Mappings::mapping_store &Mappings::GetDestinationStore() {
+  return destinations_;
 }

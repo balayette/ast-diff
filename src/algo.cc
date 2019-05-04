@@ -19,8 +19,7 @@ void mapDescendants(Tree *t1, Tree *t2, Mappings &M) {
 
 Mappings topDown(Tree *T1, Tree *T2) {
   Heap L1, L2;
-  Mappings M(T1->GetRightMostDesc() + 1,
-             T2->GetRightMostDesc() - T2->GetLeftMostDesc() + 1);
+  Mappings M(T1->GetRightMostDesc() + 1, T2->GetRightMostDesc() + 1);
 
   L1.Push(T1);
   L2.Push(T2);
