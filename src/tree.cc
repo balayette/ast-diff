@@ -125,12 +125,11 @@ Tree *Tree::FindIsomorphicChild(Tree *t) {
 }
 
 bool Tree::IsIsomorphic(Tree *t) {
-  {
-    std::lock_guard<std::mutex> lock(iso_lock_);
-    auto found = iso_cache_.find(t);
-    if (found != iso_cache_.end())
-      return true;
-  }
+  std::lock_guard<std::recursive_mutex> lock(iso_lock_);
+
+  auto found = iso_cache_.find(t);
+  if (found != iso_cache_.end())
+    return true;
 
   if (height_ != t->height_)
     return false;
@@ -146,18 +145,11 @@ bool Tree::IsIsomorphic(Tree *t) {
     if (iso == nullptr)
       return false;
 
-    {
-      std::lock_guard<std::mutex> lock(iso_lock_);
-      iso_cache_.insert(iso);
-      iso->iso_cache_.insert(me.get());
-    }
+    iso_cache_.insert(iso);
   }
 
-  {
-    std::lock_guard<std::mutex> lock(iso_lock_);
-    iso_cache_.insert(t);
-    t->iso_cache_.insert(this);
-  }
+  iso_cache_.insert(t);
+
   return true;
 }
 

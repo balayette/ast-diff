@@ -81,7 +81,7 @@ private:
   int left_desc_;
   int right_desc_;
 
-  std::mutex iso_lock_;
+  std::recursive_mutex iso_lock_;
 
   static inline std::atomic<int> tree_count_;
 
