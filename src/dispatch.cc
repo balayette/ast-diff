@@ -97,7 +97,7 @@ void do_sexp(Directory *dir, char *cc_path) {
     }
 
     if (std::any_of(dir->sexps.begin(), dir->sexps.end(),
-                    [&](Sexp &s) { return s.path == path + ".sexp"; }))
+                    [&](Sexp &s) { return s.path == (path + ".sexp"); }))
       continue;
 
     if ((!glob || std::regex_match(path, *glob)) &&
@@ -128,17 +128,48 @@ void do_sexp(Directory *dir, char *cc_path) {
 
 void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
   for (size_t i = 0; i < d1->sexps.size(); i++) {
-    for (size_t j = i; j < d2->sexps.size(); j++) {
-      auto t1 = cache->OpenAst(d1->sexps[i].path, true, ".loc");
-      auto t2 = cache->OpenAst(d2->sexps[i].path, true, ".loc");
+    for (size_t j = 0; j < d2->sexps.size(); j++) {
+      const std::string &p1 = d1->sexps[i].path;
+      const std::string &p2 = d2->sexps[j].path;
+
+      if (p1.size() == 0 || p2.size() == 0)
+        continue;
+
+      if (std::any_of(matches->begin(), matches->end(), [&](Match &m) {
+            return (m.file1->path == p1 && m.file2->path == p2) ||
+                   (m.file1->path == p2 && m.file2->path == p1);
+          }))
+        continue;
+
+      auto t1 = cache->OpenAst(p1, true, ".loc");
+      auto t2 = cache->OpenAst(p2, true, ".loc");
 
       auto mapping = Gumtree(t1.get(), t2.get());
       double s = Similarity(t1.get(), t2.get(), mapping);
       if (s < sim)
         continue;
-      matches->emplace_back(&d1->sexps[i], &d2->sexps[i], s);
+      matches->emplace_back(&d1->sexps[i], &d2->sexps[j], s);
     }
   }
+}
+
+void dump_graph(const std::vector<std::vector<Match>> &matches) {
+  std::ofstream f("graph.out");
+  f << "{\n \"matches\": [";
+
+  for (const auto &vec : matches) {
+    for (const auto &ms : vec) {
+			f << "  {\n";
+			f << "   \"file1\": \"" << ms.file1->path << "\",";
+			f << "   \"file2\": \"" << ms.file2->path << "\",";
+			f << "   \"similarity\": \"" << ms.similarity << "\",";
+			f << "   \"location\": [\n";
+			f << "    \"loc1\", \"loc2\"";
+			f << "    ]";
+    }
+  }
+
+  f << "]}";
 }
 
 void run(char *ccs[], int count) {
@@ -175,9 +206,13 @@ void run(char *ccs[], int count) {
   }
 
   for (int i = 0; i < combinations_nbr; i++) {
+		std::cout << "Waiting for " << i << '\n';
     results[i].get();
     std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\n";
   }
+
+  std::cout << "matches size: " << matches.size() << '\n';
+  dump_graph(matches);
 }
 
 int main(int argc, char *argv[]) {
