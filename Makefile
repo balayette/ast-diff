@@ -43,6 +43,7 @@ $(LIB): $(LIBOBJ)
 
 src/ast-diff: $(LIB) $(DIFFOBJ)
 
+src/dispatch: LDFLAGS += -lpthread
 src/dispatch: $(LIB) $(DISPATCHOBJ)
 
 $(DIFFEXE): src/ast-diff
