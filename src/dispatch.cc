@@ -52,7 +52,15 @@ int jobs = 1;
 
 Cache *cache = new Cache();
 
-void usage() { std::cout << "Usage\n"; }
+void usage() {
+  std::cout << "Usage: ./dispatch [OPTIONS] compile_commands.json ...\n";
+  std::cout << "Options:\n";
+  std::cout << "--sim: Minimum similarity to consider\n";
+  std::cout << "--sexp: File to the clang-sexpression executable\n";
+  std::cout << "--jobs: Number of concurrent jobs\n";
+  std::cout << "--glob: Included files globbing (regex)\n";
+  std::cout << "--ex-glob: Excluded files globbing (regex)\n";
+}
 
 int ncr(int n, int r) {
   if (r == 0)

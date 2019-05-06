@@ -18,7 +18,7 @@ If you already have s-expressions that you want to compare:
 42sh$ ./ast-diff --diff test/while.sexp test/for.sexp
 
 If you want dispatch.py to handle everything.
-42sh$ ./dispatch.py --help
+42sh$ ./dispatch --help
 
 Papers:
 
