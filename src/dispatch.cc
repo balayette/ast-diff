@@ -100,8 +100,10 @@ void do_sexp(Directory *dir, char *cc_path) {
                     [&](Sexp &s) { return s.path == (path + ".sexp"); }))
       continue;
 
-    if ((!glob || std::regex_match(path, *glob)) &&
-        !(ex_glob && std::regex_match(path, *ex_glob))) {
+    if (ex_glob && std::regex_match(path, *ex_glob))
+      continue;
+
+    if (!glob || std::regex_match(path, *glob)) {
 
       std::string cmd(sexp);
 
@@ -157,16 +159,23 @@ void dump_graph(const std::vector<std::vector<Match>> &matches) {
   std::ofstream f("graph.out");
   f << "{\n \"matches\": [";
 
+  std::vector<Match> flattened;
   for (const auto &vec : matches) {
     for (const auto &ms : vec) {
-			f << "  {\n";
-			f << "   \"file1\": \"" << ms.file1->path << "\",";
-			f << "   \"file2\": \"" << ms.file2->path << "\",";
-			f << "   \"similarity\": \"" << ms.similarity << "\",";
-			f << "   \"location\": [\n";
-			f << "    \"loc1\", \"loc2\"";
-			f << "    ]";
+      flattened.emplace_back(ms);
     }
+  }
+
+  for (size_t i = 0; i < flattened.size(); i++) {
+    f << "{\n";
+    f << "   \"file1\": \"" << flattened[i].file1->path << "\",";
+    f << "   \"file2\": \"" << flattened[i].file2->path << "\",";
+    f << "   \"similarity\": \"" << flattened[i].similarity << "\",";
+    f << "   \"locations\": [\n";
+    f << "     [\"loc1\", \"loc2\"]";
+    f << "    ]}";
+    if (i != flattened.size() - 1)
+      f << ",";
   }
 
   f << "]}";
@@ -206,7 +215,6 @@ void run(char *ccs[], int count) {
   }
 
   for (int i = 0; i < combinations_nbr; i++) {
-		std::cout << "Waiting for " << i << '\n';
     results[i].get();
     std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\n";
   }
