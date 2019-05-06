@@ -37,11 +37,13 @@ struct Directory {
 };
 
 struct Match {
-  Match(Sexp *f1, Sexp *f2, double s) : file1(f1), file2(f2), similarity(s) {}
+  Match(Sexp *f1, Sexp *f2, double s, Tree::vecpair &&map)
+      : file1(f1), file2(f2), similarity(s), mappings(map) {}
 
   Sexp *file1;
   Sexp *file2;
   double similarity;
+  Tree::vecpair mappings;
 };
 
 std::regex *glob = nullptr;
@@ -158,7 +160,8 @@ void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
       double s = Similarity(t1.get(), t2.get(), mapping);
       if (s < sim)
         continue;
-      matches->emplace_back(&d1->sexps[i], &d2->sexps[j], s);
+      matches->emplace_back(&d1->sexps[i], &d2->sexps[j], s,
+                            std::move(MappingsVec2(t1.get(), mapping)));
     }
   }
 }
@@ -180,7 +183,14 @@ void dump_graph(const std::vector<std::vector<Match>> &matches) {
     f << "   \"file2\": \"" << flattened[i].file2->path << "\",";
     f << "   \"similarity\": \"" << flattened[i].similarity << "\",";
     f << "   \"locations\": [\n";
-    f << "     [\"loc1\", \"loc2\"]";
+    for (size_t j = 0; j < flattened[i].mappings.size(); j++) {
+      f << "{\"file1loc\": \""
+        << flattened[i].mappings[j].first->GetLocationInfo() << "\",\n";
+      f << "\"file2loc\": \""
+        << flattened[i].mappings[j].second->GetLocationInfo() << "\"}\n";
+      if (j != flattened[i].mappings.size() - 1)
+        f << ",\n";
+    }
     f << "    ]}";
     if (i != flattened.size() - 1)
       f << ",";
