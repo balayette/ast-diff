@@ -41,3 +41,4 @@ private:
 void DumpMapping2(std::ostream &stream, Tree *t1, Mappings &v);
 
 Tree::vecpair MappingsVec2(Tree *t1, Mappings &v);
+Tree::vecpair MappingsVec(Tree *t1, Mappings &v);
