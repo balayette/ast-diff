@@ -30,12 +30,15 @@ DIFFEXE = ast-diff
 DISPATCHEXE = dispatch
 EXE = $(DIFFEXE) $(DISPATCHEXE)
 
+.PHONY: opti
 opti: CXXFLAGS += -O2
 opti: all
 
+.PHONY: debug
 debug: CXXFLAGS += -Og
 debug: all
 
+.PHONY: all
 all: $(LIB) $(EXE)
 
 $(LIB): $(LIBOBJ)
@@ -52,6 +55,17 @@ $(DIFFEXE): src/ast-diff
 $(DISPATCHEXE): src/dispatch
 	cp src/dispatch $(DISPATCHEXE)
 
+.PHONY: install
+install: ast-diff dispatch
+	cp ast-diff /usr/local/bin/ast-diff
+	cp dispatch /usr/local/bin/dispatch
+
+.PHONY: uninstall
+uninstall:
+	rm /usr/local/bin/ast-diff
+	rm /usr/local/bin/dispatch
+
+.PHONY: clean
 clean:
 	$(RM) $(OBJ) $(EXE) $(LIB) $(DEP) src/ast-diff src/dispatch
 
