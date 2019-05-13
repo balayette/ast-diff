@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import networkx as nx
 import json
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_pydot import write_dot
 from graphviz import Graph
 
 
@@ -147,7 +144,9 @@ def pair_graphs(pairs):
 
 def index(pairs):
     f = Page("out/index.html")
-    f.write("<html><body>")
+
+    f.write("<h1>Relation Graph</h1>")
+    f.write('<a href="relations.dot.svg"><img style="width: 100%" src="relations.dot.svg"/></a>')
 
     f.write("<h1>Pairs</h1>")
 
@@ -167,7 +166,6 @@ def index(pairs):
 
     f.write("</table>")
 
-    f.write("</body></html>")
     f.writeToFile()
 
 
@@ -180,7 +178,7 @@ def main():
     pairs = sorted(pairs, key=lambda pair: -len(pair["matches"]))
 
     relation_graph(pairs)
-    file_graph(pairs)
+    # file_graph(pairs)
     pair_graphs(pairs)
 
     index(pairs)
