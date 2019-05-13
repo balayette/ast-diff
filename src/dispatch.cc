@@ -15,10 +15,13 @@
 
 using json = nlohmann::json;
 
+struct Directory;
+
 struct Sexp {
   std::string path;
+  Directory *directory;
 
-  Sexp(const std::string &p) : path(p) {}
+  Sexp(const std::string &p, Directory *d) : path(p), directory(d) {}
 
   bool operator==(const struct Sexp &sexp) const { return sexp.path == path; }
 };
@@ -44,6 +47,12 @@ struct Match {
   Sexp *file2;
   double similarity;
   Tree::vecpair mappings;
+};
+
+struct Pair {
+  std::vector<Match> matches;
+  Directory *directory1;
+  Directory *directory2;
 };
 
 std::regex *glob = nullptr;
@@ -84,11 +93,12 @@ int ncr(int n, int r) {
 void do_sexp(Directory *dir, char *cc_path) {
   dir->cc_path = cc_path;
 
-  std::ifstream f(cc_path);
+  std::string compile_path = std::string(cc_path) + "/compile_commands.json";
+  std::ifstream f(compile_path);
   if (!f)
     return;
 
-  std::cout << "opening " << cc_path << '\n';
+  std::cout << "opening " << compile_path << '\n';
   json cc;
   f >> cc;
 
@@ -133,12 +143,15 @@ void do_sexp(Directory *dir, char *cc_path) {
         continue;
       }
 
-      dir->sexps.emplace_back(path.append(".sexp"));
+      dir->sexps.emplace_back(path.append(".sexp"), dir);
     }
   }
 }
 
-void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
+void do_diff(Pair *pair, Directory *d1, Directory *d2) {
+  pair->directory1 = d1;
+  pair->directory2 = d2;
+
   for (size_t i = 0; i < d1->sexps.size(); i++) {
     for (size_t j = 0; j < d2->sexps.size(); j++) {
       const std::string &p1 = d1->sexps[i].path;
@@ -147,10 +160,11 @@ void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
       if (p1.size() == 0 || p2.size() == 0)
         continue;
 
-      if (std::any_of(matches->begin(), matches->end(), [&](Match &m) {
-            return (m.file1->path == p1 && m.file2->path == p2) ||
-                   (m.file1->path == p2 && m.file2->path == p1);
-          }))
+      if (std::any_of(pair->matches.begin(), pair->matches.end(),
+                      [&](Match &m) {
+                        return (m.file1->path == p1 && m.file2->path == p2) ||
+                               (m.file1->path == p2 && m.file2->path == p1);
+                      }))
         continue;
 
       auto t1 = cache->OpenAst(p1, true, ".loc");
@@ -160,38 +174,76 @@ void do_diff(std::vector<Match> *matches, Directory *d1, Directory *d2) {
       double s = Similarity(t1.get(), t2.get(), mapping);
       if (s < sim)
         continue;
-      matches->emplace_back(&d1->sexps[i], &d2->sexps[j], s,
-                            std::move(MappingsVec2(t1.get(), mapping)));
+      pair->matches.emplace_back(&d1->sexps[i], &d2->sexps[j], s,
+                                 MappingsVec2(t1.get(), mapping));
     }
   }
 }
 
-void dump_graph(const std::vector<std::vector<Match>> &matches) {
+std::ostream &dump_match(const Match &match, std::ostream &os) {
+  os << "{\n";
+  os << "   \"file1\": {\n";
+  os << "\"path\": \"" << match.file1->path << "\",";
+  os << "\"directory\": \"" << match.file1->directory->cc_path << "\"},";
+  os << "   \"file2\": {\n";
+  os << "\"path\": \"" << match.file2->path << "\",";
+  os << "\"directory\": \"" << match.file2->directory->cc_path << "\"},";
+  os << "   \"similarity\": \"" << match.similarity << "\",";
+  os << "   \"locations\": [\n";
+  for (size_t j = 0; j < match.mappings.size(); j++) {
+    os << "{\"file1loc\": \"" << match.mappings[j].first->GetLocationInfo()
+       << "\",\n";
+    os << "\"file2loc\": \"" << match.mappings[j].second->GetLocationInfo()
+       << "\"}\n";
+    if (j != match.mappings.size() - 1)
+      os << ",\n";
+  }
+  os << "    ]}";
+
+  return os;
+}
+
+void dump_pairs(const std::vector<Pair> &pairs) {
+  std::ofstream f("pairs.json");
+
+  f << "[";
+
+  for (auto it = pairs.begin(); it != pairs.end(); it++) {
+    const auto &pair = *it;
+
+    f << "{";
+
+    f << "\"directory1\": \"" << pair.directory1->cc_path << "\",";
+    f << "\"directory2\": \"" << pair.directory2->cc_path << "\",";
+    f << "\"matches\": [";
+    for (size_t i = 0; i < pair.matches.size(); i++) {
+      dump_match(pair.matches[i], f);
+      if (i < pair.matches.size() - 1)
+        f << ",";
+    }
+    f << "]";
+
+    f << "}";
+    if (it != pairs.end() - 1)
+      f << ",";
+  }
+
+  f << "]";
+}
+
+void dump_matches(const std::vector<Pair> &pairs) {
   std::ofstream f("graph.out");
   f << "{\n \"matches\": [";
 
   std::vector<Match> flattened;
-  for (const auto &vec : matches) {
-    for (const auto &ms : vec) {
+  for (const auto &pair : pairs) {
+    for (const auto &ms : pair.matches) {
       flattened.emplace_back(ms);
     }
   }
 
   for (size_t i = 0; i < flattened.size(); i++) {
-    f << "{\n";
-    f << "   \"file1\": \"" << flattened[i].file1->path << "\",";
-    f << "   \"file2\": \"" << flattened[i].file2->path << "\",";
-    f << "   \"similarity\": \"" << flattened[i].similarity << "\",";
-    f << "   \"locations\": [\n";
-    for (size_t j = 0; j < flattened[i].mappings.size(); j++) {
-      f << "{\"file1loc\": \""
-        << flattened[i].mappings[j].first->GetLocationInfo() << "\",\n";
-      f << "\"file2loc\": \""
-        << flattened[i].mappings[j].second->GetLocationInfo() << "\"}\n";
-      if (j != flattened[i].mappings.size() - 1)
-        f << ",\n";
-    }
-    f << "    ]}";
+    dump_match(flattened[i], f);
     if (i != flattened.size() - 1)
       f << ",";
   }
@@ -220,13 +272,13 @@ void run(char *ccs[], int count) {
   std::cout << combinations_nbr << " combinations.\n";
 
   results.resize(combinations_nbr);
-  std::vector<std::vector<Match>> matches(combinations_nbr);
+  std::vector<Pair> pairs(combinations_nbr);
 
   int idx = 0;
   for (int i = 0; i < count; i++) {
     for (int j = i + 1; j < count; j++) {
-      results[idx] = pool.push([=, &directories, &matches](int) {
-        do_diff(&matches[idx], &directories[i], &directories[j]);
+      results[idx] = pool.push([=, &directories, &pairs](int) {
+        do_diff(&pairs[idx], &directories[i], &directories[j]);
       });
       idx++;
     }
@@ -237,8 +289,7 @@ void run(char *ccs[], int count) {
     std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\n";
   }
 
-  std::cout << "matches size: " << matches.size() << '\n';
-  dump_graph(matches);
+  dump_pairs(pairs);
 }
 
 int main(int argc, char *argv[]) {
