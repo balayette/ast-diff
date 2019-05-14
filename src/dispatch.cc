@@ -264,9 +264,11 @@ void run(char *ccs[], int count) {
 
   for (int i = 0; i < count; i++) {
     results[i].get();
-    std::cout << (int)(((i + 1) / (float)count) * 100) << "%\n";
+    std::cout << (int)(((i + 1) / (float)count) * 100) << "%\r";
+    std::flush(std::cout);
   }
 
+  std::cout << std::endl;
   int combinations_nbr = ncr(count, 2);
   pool.resize(std::min(jobs, combinations_nbr));
   std::cout << combinations_nbr << " combinations.\n";
@@ -286,8 +288,11 @@ void run(char *ccs[], int count) {
 
   for (int i = 0; i < combinations_nbr; i++) {
     results[i].get();
-    std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\n";
+    std::cout << (int)(((i + 1) / (float)combinations_nbr) * 100) << "%\r";
+    std::flush(std::cout);
   }
+
+  std::cout << std::endl;
 
   dump_pairs(pairs);
 }
