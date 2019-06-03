@@ -21,11 +21,11 @@ Symbol &Symbol::operator=(const Symbol &rhs) {
   return *this;
 }
 
-bool Symbol::operator==(const Symbol &rhs) {
+bool Symbol::operator==(const Symbol &rhs) const {
   return rhs.instance_ == instance_;
 }
 
-bool Symbol::operator!=(const Symbol &rhs) {
+bool Symbol::operator!=(const Symbol &rhs) const {
   return !(rhs.instance_ == instance_);
 }
 
@@ -33,6 +33,6 @@ std::ostream &operator<<(std::ostream &ostr, const Symbol &the) {
   return ostr << *the.instance_;
 }
 
-int Symbol::size() { return instance_->size(); }
+size_t Symbol::size() const { return instance_->size(); }
 
-const std::string &Symbol::get() { return *instance_; }
+const std::string &Symbol::get() const { return *instance_; }

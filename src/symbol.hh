@@ -11,14 +11,14 @@ public:
 
   Symbol &operator=(const Symbol &rhs);
 
-  bool operator==(const Symbol &rhs);
-  bool operator!=(const Symbol &rhs);
+  bool operator==(const Symbol &rhs) const;
+  bool operator!=(const Symbol &rhs) const;
 
-  int size();
+  size_t size() const;
 
   friend std::ostream &operator<<(std::ostream &ostr, const Symbol &the);
 
-  const std::string &get();
+  const std::string &get() const;
 
 private:
   std::set<std::string> &getSet();

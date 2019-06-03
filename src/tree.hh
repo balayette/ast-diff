@@ -23,61 +23,61 @@ public:
   using vecpair = std::vector<pair>;
 
   Tree();
-  Tree(std::string &value);
+  Tree(const std::string &value);
 
   void AddChild(Tree::sptr &tree);
-  std::ostream &Print(std::ostream &stream);
+  std::ostream &Print(std::ostream &stream) const;
 
-  size_t ChildrenSize();
-  vecsptr &GetChildren();
+  size_t ChildrenSize() const;
+  const vecsptr &GetChildren() const;
 
-  void SetValue(std::string &value);
-  Symbol &GetValue();
+  void SetValue(const std::string &value);
+  const Symbol &GetValue() const;
 
-  void SetHeight(int height);
-  int GetHeight();
-  int InitTree();
+  void SetHeight(size_t height);
+  size_t GetHeight() const;
+  size_t InitTree();
 
   void LoadLocation(std::istream &stream);
   void LoadLocation(const std::vector<std::string> &loc);
   const std::string &GetLocationInfo();
 
-  Tree *GetParent();
+  const Tree *GetParent() const;
   void SetParent(Tree *p);
 
-  int GetIdx();
+  int GetIdx() const;
 
-  int GetLeftMostDesc();
-  int GetRightMostDesc();
+  int GetLeftMostDesc() const;
+  int GetRightMostDesc() const;
 
   std::ostream &PrettyPrint(std::ostream &stream);
-  std::ostream &DumpDot(std::ostream &stream);
+  std::ostream &DumpDot(std::ostream &stream) const;
 
   template <typename Func> void PreorderTraversal(Func f);
 
   template <typename Func> void PostorderTraversal(Func f);
 
-  Tree *FindIsomorphicChild(Tree *t);
-  bool IsIsomorphic(Tree *t);
+  Tree *FindIsomorphicChild(const Tree *t) const;
+  bool IsIsomorphic(const Tree *t) const;
 
-  bool IsDescendantOf(Tree *t);
+  bool IsDescendantOf(const Tree *t) const;
 
-  friend void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2,
+  friend void DumpMapping(std::ostream &stream, const Tree *t1, const Tree *t2,
                           Mappings &v);
 
-  friend void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2,
+  friend void DumpMapping2(std::ostream &stream, const Tree *t1, const Tree *t2,
                            Mappings &v);
 
   friend std::ostream &operator<<(std::ostream &os, const Tree &tree);
 
 private:
   Symbol value_;
-  Tree *parent_;
+  const Tree *parent_;
   std::string location_info_;
   int tree_id_;
   int idx_;
-  int height_;
-  int depth_;
+  size_t height_;
+  size_t depth_;
   int left_desc_;
   int right_desc_;
 
@@ -88,8 +88,8 @@ private:
   vecsptr children_;
   std::unordered_set<Tree *> iso_cache_;
 
-  int initTree(int depth, Tree *parent);
-  void dumpDot(std::ostream &stream);
+  size_t initTree(size_t depth, const Tree *parent);
+  void dumpDot(std::ostream &stream) const;
 };
 
 Tree::vecptr GetDescendants(Tree *t);

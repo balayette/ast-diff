@@ -14,31 +14,29 @@ public:
 
   Mappings(size_t nodeCountFirst, size_t nodeCountSecond);
 
-  void AddMapping(treeptr t1, treeptr t2);
+  void AddMapping(Tree *t1, Tree *t2);
 
-  bool ContainsMapping(treeptr t1, treeptr t2);
+  bool ContainsMapping(const Tree *t1, const Tree *t2) const;
 
-  bool ContainsSourceMapping(treeptr t);
-  bool ContainsDestinationMapping(treeptr t);
+  bool ContainsSourceMapping(const Tree *t) const;
+  bool ContainsDestinationMapping(const Tree *t) const;
 
-  treeptr GetDestination(treeptr t);
-  treeptr GetSource(treeptr t);
+  Tree *GetDestination(const Tree *t) const;
+  Tree *GetSource(const Tree *t) const;
 
-  int size();
+  size_t size() const;
 
   mapping_iterator begin();
   mapping_iterator end();
 
-  const mapping_store &GetMappingsStore();
-  const mapping_store &GetDestinationStore();
+  const mapping_store &GetMappingsStore() const;
+  const mapping_store &GetDestinationStore() const;
 
 private:
   mapping_store mappings_;
   mapping_store destinations_;
-  int mapping_nbr_;
+  size_t mapping_nbr_;
 };
-
-void DumpMapping2(std::ostream &stream, Tree *t1, Mappings &v);
 
 Tree::vecpair MappingsVec2(Tree *t1, Mappings &v);
 Tree::vecpair MappingsVec(Tree *t1, Mappings &v);

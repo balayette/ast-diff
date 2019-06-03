@@ -8,11 +8,11 @@ Tree::Tree()
       tree_id_(tree_count_.fetch_add(1, std::memory_order_relaxed)), idx_(0),
       height_(1), depth_(1), left_desc_(0), right_desc_(0) {}
 
-Tree::Tree(std::string &value) : Tree() { value_ = value; }
+Tree::Tree(const std::string &value) : Tree() { value_ = value; }
 
 void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
 
-std::ostream &Tree::Print(std::ostream &stream) {
+std::ostream &Tree::Print(std::ostream &stream) const {
   stream << '(' << value_;
   for (auto it = children_.begin(); it != children_.end(); it++) {
     stream << ' ';
@@ -24,7 +24,7 @@ std::ostream &Tree::Print(std::ostream &stream) {
 }
 
 std::ostream &Tree::PrettyPrint(std::ostream &stream) {
-  for (int i = 0; i < depth_; i++)
+  for (size_t i = 0; i < depth_; i++)
     stream << ' ';
 
   stream << '(' << value_;
@@ -44,25 +44,25 @@ std::ostream &Tree::PrettyPrint(std::ostream &stream) {
   return stream;
 }
 
-size_t Tree::ChildrenSize() { return children_.size(); }
+size_t Tree::ChildrenSize() const { return children_.size(); }
 
-Tree::vecsptr &Tree::GetChildren() { return children_; }
+const Tree::vecsptr &Tree::GetChildren() const { return children_; }
 
-void Tree::SetValue(std::string &value) { value_ = value; }
+void Tree::SetValue(const std::string &value) { value_ = value; }
 
-Symbol &Tree::GetValue() { return value_; }
+const Symbol &Tree::GetValue() const { return value_; }
 
-void Tree::SetHeight(int height) { height_ = height; }
+void Tree::SetHeight(size_t height) { height_ = height; }
 
-int Tree::GetHeight() { return height_; }
+size_t Tree::GetHeight() const { return height_; }
 
-Tree *Tree::GetParent() { return parent_; }
+const Tree *Tree::GetParent() const { return parent_; }
 
 void Tree::SetParent(Tree *p) { parent_ = p; }
 
-int Tree::initTree(int depth, Tree *parent) {
+size_t Tree::initTree(size_t depth, const Tree *parent) {
   depth_ = depth;
-  auto max = 0;
+  size_t max = 0;
 
   for (auto &it : children_) {
     auto h = it->initTree(depth + 1, this);
@@ -76,8 +76,8 @@ int Tree::initTree(int depth, Tree *parent) {
   return height_;
 }
 
-int Tree::InitTree() {
-  int node_count = 0;
+size_t Tree::InitTree() {
+  size_t node_count = 0;
   PostorderTraversal([&](Tree *t) {
     t->idx_ = node_count++;
     t->left_desc_ = t->idx_;
@@ -86,7 +86,7 @@ int Tree::InitTree() {
   return initTree(0, nullptr);
 }
 
-void Tree::dumpDot(std::ostream &stream) {
+void Tree::dumpDot(std::ostream &stream) const {
   std::string out(value_.get());
 
   for (size_t f = out.find("\"", 0); f != std::string::npos;
@@ -105,7 +105,7 @@ void Tree::dumpDot(std::ostream &stream) {
     it->dumpDot(stream);
 }
 
-std::ostream &Tree::DumpDot(std::ostream &stream) {
+std::ostream &Tree::DumpDot(std::ostream &stream) const {
   stream << "digraph AST {\n";
 
   dumpDot(stream);
@@ -114,7 +114,7 @@ std::ostream &Tree::DumpDot(std::ostream &stream) {
 }
 
 // Find an isomorphic child to `this` among the children of t.
-Tree *Tree::FindIsomorphicChild(Tree *t) {
+Tree *Tree::FindIsomorphicChild(const Tree *t) const {
   for (auto &other : t->children_) {
     if (IsIsomorphic(other.get())) {
       return other.get();
@@ -124,13 +124,7 @@ Tree *Tree::FindIsomorphicChild(Tree *t) {
   return nullptr;
 }
 
-bool Tree::IsIsomorphic(Tree *t) {
-  std::lock_guard<std::recursive_mutex> lock(iso_lock_);
-
-  auto found = iso_cache_.find(t);
-  if (found != iso_cache_.end())
-    return true;
-
+bool Tree::IsIsomorphic(const Tree *t) const {
   if (height_ != t->height_)
     return false;
 
@@ -144,11 +138,7 @@ bool Tree::IsIsomorphic(Tree *t) {
     auto *iso = me->FindIsomorphicChild(t);
     if (iso == nullptr)
       return false;
-
-    iso_cache_.insert(iso);
   }
-
-  iso_cache_.insert(t);
 
   return true;
 }
@@ -170,14 +160,14 @@ Tree::vecptr GetDescendants(Tree *t) {
   return v;
 }
 
-bool Tree::IsDescendantOf(Tree *t) {
+bool Tree::IsDescendantOf(const Tree *t) const {
   return idx_ >= t->left_desc_ && idx_ <= t->right_desc_;
 }
 
-int Tree::GetIdx() { return idx_; }
+int Tree::GetIdx() const { return idx_; }
 
-int Tree::GetLeftMostDesc() { return left_desc_; }
-int Tree::GetRightMostDesc() { return right_desc_; }
+int Tree::GetLeftMostDesc() const { return left_desc_; }
+int Tree::GetRightMostDesc() const { return right_desc_; }
 
 void Tree::LoadLocation(std::istream &stream) {
   PreorderTraversal([&](Tree *f) { std::getline(stream, f->location_info_); });

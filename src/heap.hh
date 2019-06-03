@@ -10,15 +10,15 @@ public:
   Heap() = default;
 
   void Push(Tree *t);
-  int PeekMax();
+  int PeekMax() const;
   Tree::vecptr Pop();
-  void Open(Tree *t);
+  void Open(const Tree *t);
 
-  int size();
+  size_t size() const;
 
 private:
   struct compare_tree {
-    bool operator()(Tree *t1, Tree *t2) {
+    bool operator()(const Tree *t1, const Tree *t2) {
       return t1->GetHeight() < t2->GetHeight();
     }
   };

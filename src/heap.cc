@@ -2,7 +2,7 @@
 
 void Heap::Push(Tree *t) { heap_.push(t); }
 
-int Heap::PeekMax() {
+int Heap::PeekMax() const {
   if (heap_.size() == 0)
     return -1;
   return heap_.top()->GetHeight();
@@ -14,16 +14,16 @@ Tree::vecptr Heap::Pop() {
 
   Tree::vecptr ret;
 
-  for (int max = heap_.top()->GetHeight();
+  for (size_t max = heap_.top()->GetHeight();
        heap_.size() > 0 && heap_.top()->GetHeight() == max; heap_.pop())
     ret.push_back(heap_.top());
 
   return ret;
 }
 
-void Heap::Open(Tree *t) {
+void Heap::Open(const Tree *t) {
   for (const auto &it : t->GetChildren())
     heap_.push(it.get());
 }
 
-int Heap::size() { return heap_.size(); }
+size_t Heap::size() const { return heap_.size(); }

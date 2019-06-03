@@ -6,7 +6,7 @@ Mappings::Mappings(size_t nodeCountFirst, size_t nodeCountSecond)
     : mappings_(nodeCountFirst, nullptr),
       destinations_(nodeCountSecond, nullptr), mapping_nbr_(0) {}
 
-void Mappings::AddMapping(treeptr t1, treeptr t2) {
+void Mappings::AddMapping(Tree *t1, Tree *t2) {
   if (mappings_[t1->GetIdx()] != nullptr)
     return;
   mappings_[t1->GetIdx()] = t2;
@@ -14,33 +14,33 @@ void Mappings::AddMapping(treeptr t1, treeptr t2) {
   mapping_nbr_++;
 }
 
-bool Mappings::ContainsMapping(treeptr t1, treeptr t2) {
+bool Mappings::ContainsMapping(const Tree *t1, const Tree *t2) const {
   return mappings_[t1->GetIdx()] == t2;
 }
 
-bool Mappings::ContainsSourceMapping(treeptr t) {
+bool Mappings::ContainsSourceMapping(const Tree *t) const {
   return mappings_[t->GetIdx()] != nullptr;
 }
 
-bool Mappings::ContainsDestinationMapping(treeptr t) {
+bool Mappings::ContainsDestinationMapping(const Tree *t) const {
   return destinations_[t->GetIdx()] != nullptr;
 }
 
-Mappings::treeptr Mappings::GetDestination(treeptr t) {
+Tree *Mappings::GetDestination(const Tree *t) const {
   return mappings_[t->GetIdx()];
 }
 
-Mappings::treeptr Mappings::GetSource(treeptr t) {
+Tree *Mappings::GetSource(const Tree *t) const {
   return destinations_[t->GetIdx()];
 }
 
-int Mappings::size() { return mapping_nbr_; }
+size_t Mappings::size() const { return mapping_nbr_; }
 
 Mappings::mapping_iterator Mappings::begin() { return mappings_.begin(); }
 
 Mappings::mapping_iterator Mappings::end() { return mappings_.end(); }
 
-void dumpMapping2(std::ostream &stream, Tree *t1, Mappings &v) {
+void dumpMapping2(std::ostream &stream, const Tree *t1, const Mappings &v) {
   auto *dest = v.GetDestination(t1);
   if (dest) {
     stream << *t1 << " -> " << *dest
@@ -53,7 +53,8 @@ void dumpMapping2(std::ostream &stream, Tree *t1, Mappings &v) {
     dumpMapping2(stream, child.get(), v);
 }
 
-void DumpMapping2(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
+void DumpMapping2(std::ostream &stream, const Tree *t1, const Tree *t2,
+                  Mappings &v) {
   stream << "digraph G {\n\tsubgraph AST1 {\n";
   t1->dumpDot(stream);
   stream << "}\n\tsubgraph AST2 {\n";
@@ -102,7 +103,8 @@ Tree::vecpair MappingsVec(Tree *t1, Mappings &v) {
   return ret;
 }
 
-void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
+void DumpMapping(std::ostream &stream, const Tree *t1, const Tree *t2,
+                 Mappings &v) {
   stream << "digraph G {\n\tsubgraph AST1 {\n";
   t1->dumpDot(stream);
   stream << "}\n\tsubgraph AST2 {\n";
@@ -121,10 +123,10 @@ void DumpMapping(std::ostream &stream, Tree *t1, Tree *t2, Mappings &v) {
   stream << "}\n";
 }
 
-const Mappings::mapping_store &Mappings::GetMappingsStore() {
+const Mappings::mapping_store &Mappings::GetMappingsStore() const {
   return mappings_;
 }
 
-const Mappings::mapping_store &Mappings::GetDestinationStore() {
+const Mappings::mapping_store &Mappings::GetDestinationStore() const {
   return destinations_;
 }
