@@ -21,7 +21,7 @@ Tree::sptr Cache::OpenAst(const std::string &path, bool location,
     std::exit(2);
   }
 
-  Lexer l(f);
+  Lexer l(f, path);
   Parser p(l);
 
   auto ret = p.Parse();

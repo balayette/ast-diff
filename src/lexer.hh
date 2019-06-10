@@ -9,9 +9,12 @@
 class Lexer {
 public:
   explicit Lexer(std::istream &stream);
+  explicit Lexer(std::istream &stream, const std::string &filename);
 
   std::shared_ptr<Token> Peek();
   void Eat();
+
+  const std::string &get_filename() const;
 
 private:
   enum States { START, ATOM, STRING_LIT };
@@ -31,4 +34,6 @@ private:
 
   int pos_;
   int line_;
+
+  std::string filename_;
 };

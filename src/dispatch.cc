@@ -93,7 +93,9 @@ int ncr(int n, int r) {
 void do_sexp(Directory *dir, char *cc_path) {
   dir->cc_path = cc_path;
 
-  std::string compile_path = std::string(cc_path) + "/compile_commands.json";
+  std::string compile_path = std::string(cc_path);
+  if (compile_path.find("compile_commands.json") == std::string::npos)
+      compile_path = compile_path + "/compile_commands.json";
   std::ifstream f(compile_path);
   if (!f)
     return;
@@ -152,6 +154,8 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
   pair->directory1 = d1;
   pair->directory2 = d2;
 
+  std::cout << d1->cc_path << " - " << d2->cc_path << '\n';
+
   for (size_t i = 0; i < d1->sexps.size(); i++) {
     for (size_t j = 0; j < d2->sexps.size(); j++) {
       const std::string &p1 = d1->sexps[i].path;
@@ -174,6 +178,7 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
       double s = Similarity(t1.get(), t2.get(), mapping);
       if (s < sim)
         continue;
+
       pair->matches.emplace_back(&d1->sexps[i], &d2->sexps[j], s,
                                  MappingsVec2(t1.get(), mapping));
     }

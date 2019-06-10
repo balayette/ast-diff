@@ -6,9 +6,18 @@
 #define MAKE_TOK(Type) std::make_shared<Token>(Type, line_, pos_);
 
 Lexer::Lexer(std::istream &stream)
-    : stream_(stream), state_(START), rollback_(false), pos_(0), line_(1) {
+    : stream_(stream), state_(START), rollback_(false), pos_(0), line_(1),
+      filename_("stdin") {
   Eat();
 }
+
+Lexer::Lexer(std::istream &stream, const std::string &filename)
+    : stream_(stream), state_(START), rollback_(false), pos_(0), line_(1),
+      filename_(filename) {
+  Eat();
+}
+
+const std::string &Lexer::get_filename() const { return filename_; }
 
 char Lexer::nextChar() {
   char c = 0;
