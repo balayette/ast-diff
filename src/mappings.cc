@@ -50,7 +50,7 @@ void dumpMapping2(std::ostream &stream, const Tree *t1, const Mappings &v) {
   }
 
   for (auto &child : t1->GetChildren())
-    dumpMapping2(stream, child.get(), v);
+    dumpMapping2(stream, child, v);
 }
 
 void DumpMapping2(std::ostream &stream, const Tree *t1, const Tree *t2,
@@ -74,7 +74,7 @@ void mappingsVec2(Tree *t1, Mappings &v, Tree::vecpair &ret) {
   }
 
   for (auto &child : t1->GetChildren())
-    mappingsVec2(child.get(), v, ret);
+    mappingsVec2(child, v, ret);
 }
 
 Tree::vecpair MappingsVec2(Tree *t1, Mappings &v) {
@@ -92,7 +92,7 @@ void mappingsVec(Tree *t1, Mappings &v, Tree::vecpair &ret) {
   }
 
   for (auto &child : t1->GetChildren())
-    mappingsVec(child.get(), v, ret);
+    mappingsVec(child, v, ret);
 }
 
 Tree::vecpair MappingsVec(Tree *t1, Mappings &v) {

@@ -25,11 +25,11 @@ public:
   Tree();
   Tree(const std::string &value);
 
-  void AddChild(Tree::sptr &tree);
+  void AddChild(Tree *tree);
   std::ostream &Print(std::ostream &stream) const;
 
   size_t ChildrenSize() const;
-  const vecsptr &GetChildren() const;
+  const std::vector<Tree *> &GetChildren() const;
 
   void SetValue(const std::string &value);
   const Symbol &GetValue() const;
@@ -45,10 +45,14 @@ public:
   const Tree *GetParent() const;
   void SetParent(Tree *p);
 
-  int GetIdx() const;
+  void SetIdx(size_t idx);
+  size_t GetIdx() const;
+
+  size_t GetHash() const;
 
   int GetLeftMostDesc() const;
   int GetRightMostDesc() const;
+  size_t GetDescendantsCount() const;
 
   std::ostream &PrettyPrint(std::ostream &stream);
   std::ostream &DumpDot(std::ostream &stream) const;
@@ -81,15 +85,12 @@ private:
   int left_desc_;
   int right_desc_;
 
-  std::recursive_mutex iso_lock_;
-
-  static inline std::atomic<int> tree_count_;
-
-  vecsptr children_;
-  std::unordered_set<Tree *> iso_cache_;
+  std::vector<Tree *> children_;
 
   size_t initTree(size_t depth, const Tree *parent);
   void dumpDot(std::ostream &stream) const;
+
+  size_t hash_;
 };
 
 Tree::vecptr GetDescendants(Tree *t);

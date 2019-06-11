@@ -10,7 +10,7 @@ class Parser {
 public:
   Parser(Lexer &lexer);
 
-  Tree::sptr Parse();
+  Tree *Parse();
 
 private:
   Lexer &lexer_;

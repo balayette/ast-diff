@@ -7,8 +7,8 @@
 #include "lexer.hh"
 #include "parser.hh"
 
-Tree::sptr Cache::OpenAst(const std::string &path, bool location,
-                          const std::string &loc) {
+Tree *Cache::OpenAst(const std::string &path, bool location,
+                     const std::string &loc) {
   std::lock_guard<std::mutex> lock(cache_lock_);
 
   auto it = trees.find(path);

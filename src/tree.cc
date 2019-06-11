@@ -4,13 +4,12 @@
 #include <string>
 
 Tree::Tree()
-    : value_(""), parent_(nullptr), location_info_(""),
-      tree_id_(tree_count_.fetch_add(1, std::memory_order_relaxed)), idx_(0),
-      height_(1), depth_(1), left_desc_(0), right_desc_(0) {}
+    : value_(""), parent_(nullptr), location_info_(""), tree_id_(0), idx_(0),
+      height_(1), depth_(1), left_desc_(0), right_desc_(0), hash_(0) {}
 
 Tree::Tree(const std::string &value) : Tree() { value_ = value; }
 
-void Tree::AddChild(Tree::sptr &tree) { children_.push_back(tree); }
+void Tree::AddChild(Tree *tree) { children_.push_back(tree); }
 
 std::ostream &Tree::Print(std::ostream &stream) const {
   stream << '(' << value_;
@@ -46,7 +45,7 @@ std::ostream &Tree::PrettyPrint(std::ostream &stream) {
 
 size_t Tree::ChildrenSize() const { return children_.size(); }
 
-const Tree::vecsptr &Tree::GetChildren() const { return children_; }
+const std::vector<Tree *> &Tree::GetChildren() const { return children_; }
 
 void Tree::SetValue(const std::string &value) { value_ = value; }
 
@@ -56,6 +55,8 @@ void Tree::SetHeight(size_t height) { height_ = height; }
 
 size_t Tree::GetHeight() const { return height_; }
 
+size_t Tree::GetHash() const { return hash_; }
+
 const Tree *Tree::GetParent() const { return parent_; }
 
 void Tree::SetParent(Tree *p) { parent_ = p; }
@@ -64,15 +65,18 @@ size_t Tree::initTree(size_t depth, const Tree *parent) {
   depth_ = depth;
   size_t max = 0;
 
+  std::string hash = std::to_string(std::hash<std::string>{}(value_.get()));
   for (auto &it : children_) {
     auto h = it->initTree(depth + 1, this);
     max = std::max(h, max);
     left_desc_ = std::min(left_desc_, it->left_desc_);
     right_desc_ = std::max(right_desc_, it->right_desc_);
+    hash += std::to_string(it->GetHash());
   }
 
   height_ = max + 1;
   parent_ = parent;
+  hash_ = std::hash<std::string>{}(hash);
   return height_;
 }
 
@@ -115,9 +119,9 @@ std::ostream &Tree::DumpDot(std::ostream &stream) const {
 
 // Find an isomorphic child to `this` among the children of t.
 Tree *Tree::FindIsomorphicChild(const Tree *t) const {
-  for (auto &other : t->children_) {
-    if (IsIsomorphic(other.get())) {
-      return other.get();
+  for (auto *other : t->children_) {
+    if (IsIsomorphic(other)) {
+      return other;
     }
   }
 
@@ -125,6 +129,9 @@ Tree *Tree::FindIsomorphicChild(const Tree *t) const {
 }
 
 bool Tree::IsIsomorphic(const Tree *t) const {
+  if (hash_ != t->hash_)
+    return false;
+
   if (height_ != t->height_)
     return false;
 
@@ -145,11 +152,11 @@ bool Tree::IsIsomorphic(const Tree *t) const {
 
 void getDescendants(Tree *t, Tree::vecptr &v) {
   auto &children = t->GetChildren();
-  for (const auto &child : children)
-    v.push_back(child.get());
+  for (auto *child : children)
+    v.push_back(child);
 
-  for (auto &it : children)
-    getDescendants(it.get(), v);
+  for (auto *it : children)
+    getDescendants(it, v);
 }
 
 Tree::vecptr GetDescendants(Tree *t) {
@@ -164,10 +171,14 @@ bool Tree::IsDescendantOf(const Tree *t) const {
   return idx_ >= t->left_desc_ && idx_ <= t->right_desc_;
 }
 
-int Tree::GetIdx() const { return idx_; }
+void Tree::SetIdx(size_t idx) { idx_ = idx; }
+
+size_t Tree::GetIdx() const { return idx_; }
 
 int Tree::GetLeftMostDesc() const { return left_desc_; }
 int Tree::GetRightMostDesc() const { return right_desc_; }
+
+size_t Tree::GetDescendantsCount() const { return right_desc_ - left_desc_; }
 
 void Tree::LoadLocation(std::istream &stream) {
   PreorderTraversal([&](Tree *f) { std::getline(stream, f->location_info_); });

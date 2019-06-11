@@ -12,6 +12,7 @@ LIBOBJ = \
 	src/algo.o \
 	src/mappings.o \
 	src/cache.o \
+	src/pool.o \
 
 DIFFOBJ = \
 	src/ast-diff.o \

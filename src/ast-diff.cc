@@ -65,19 +65,19 @@ double diff(char *file1, char *file2, bool dump, char *extension) {
     ret2->DumpDot(out2);
   }
 
-  auto mapping = Gumtree(ret.get(), ret2.get());
+  auto mapping = Gumtree(ret, ret2);
 
   if (dump) {
     std::ofstream map("map.dot");
-    DumpMapping2(map, ret.get(), ret2.get(), mapping);
+    DumpMapping2(map, ret, ret2, mapping);
   }
 
   std::cout << "{\"file1\": \"" << file1 << "\",";
   std::cout << "\"file2\": \"" << file2 << "\",";
-  std::cout << "\"similarity\": " << Similarity(ret.get(), ret2.get(), mapping);
+  std::cout << "\"similarity\": " << Similarity(ret, ret2, mapping);
   std::cout << ", \"mappings\": [\n";
 
-  auto vec = MappingsVec2(ret.get(), mapping);
+  auto vec = MappingsVec2(ret, mapping);
   for (size_t i = 0; i < vec.size(); i++) {
     std::cout << "[\"" << vec[i].first->GetLocationInfo() << "\",";
     std::cout << "\"" << vec[i].second->GetLocationInfo() << "\"]";

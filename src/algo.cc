@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "heap.hh"
+#include "pool.hh"
 #include "utils.hh"
 
 #define MIN_HEIGHT (2)
@@ -12,8 +13,8 @@
 void mapDescendants(Tree *t1, Tree *t2, Mappings &M) {
   for (auto &child : t1->GetChildren()) {
     auto *matching = child->FindIsomorphicChild(t2);
-    M.AddMapping(child.get(), matching);
-    mapDescendants(child.get(), matching, M);
+    M.AddMapping(child, matching);
+    mapDescendants(child, matching, M);
   }
 }
 
@@ -72,8 +73,8 @@ Mappings topDown(Tree *T1, Tree *T2) {
 double dice(Tree *t1, Tree *t2, Mappings &M) {
   auto nbr = 0;
 
-  for (auto *desc : GetDescendants(t1)) {
-    auto *dest = M.GetDestination(desc);
+  for (auto [it, end] = pool::GetDescendants(t1); it != end; it++) {
+    auto *dest = M.GetDestination(*it);
     if (!dest)
       continue;
     if (!dest->IsDescendantOf(t2))
@@ -83,7 +84,7 @@ double dice(Tree *t1, Tree *t2, Mappings &M) {
   }
 
   double d = ((double)nbr * 2.0) /
-             (GetDescendants(t1).size() + GetDescendants(t2).size());
+             (t1->GetDescendantsCount() + t2->GetDescendantsCount());
   return d;
 }
 
@@ -114,7 +115,7 @@ void bottomUp(Tree *T1, Tree *T2, Mappings &M) {
       return;
 
     for (auto &child : curr->GetChildren()) {
-      if (!M.ContainsSourceMapping(child.get()))
+      if (!M.ContainsSourceMapping(child))
         continue;
 
       descendantsPost.push_back(curr);
@@ -141,5 +142,5 @@ Mappings Gumtree(Tree *T1, Tree *T2) {
 double Similarity(Tree *T1, Tree *T2, Mappings &mappings) {
   return (
       2 * mappings.size() /
-      ((double)GetDescendants(T1).size() + 1 + GetDescendants(T2).size() + 1));
+      ((double)T1->GetDescendantsCount() + 1 + T2->GetDescendantsCount() + 1));
 }

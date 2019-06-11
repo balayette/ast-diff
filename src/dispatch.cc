@@ -154,8 +154,6 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
   pair->directory1 = d1;
   pair->directory2 = d2;
 
-  std::cout << d1->cc_path << " - " << d2->cc_path << '\n';
-
   for (size_t i = 0; i < d1->sexps.size(); i++) {
     for (size_t j = 0; j < d2->sexps.size(); j++) {
       const std::string &p1 = d1->sexps[i].path;
@@ -174,13 +172,13 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
       auto t1 = cache->OpenAst(p1, true, ".loc");
       auto t2 = cache->OpenAst(p2, true, ".loc");
 
-      auto mapping = Gumtree(t1.get(), t2.get());
-      double s = Similarity(t1.get(), t2.get(), mapping);
+      auto mapping = Gumtree(t1, t2);
+      double s = Similarity(t1, t2, mapping);
       if (s < sim)
         continue;
 
       pair->matches.emplace_back(&d1->sexps[i], &d2->sexps[j], s,
-                                 MappingsVec2(t1.get(), mapping));
+                                 MappingsVec2(t1, mapping));
     }
   }
 }

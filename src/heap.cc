@@ -22,8 +22,8 @@ Tree::vecptr Heap::Pop() {
 }
 
 void Heap::Open(const Tree *t) {
-  for (const auto &it : t->GetChildren())
-    heap_.push(it.get());
+  for (auto *it : t->GetChildren())
+    heap_.push(it);
 }
 
 size_t Heap::size() const { return heap_.size(); }
