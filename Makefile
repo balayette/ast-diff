@@ -32,8 +32,13 @@ DISPATCHEXE = dispatch
 EXE = $(DIFFEXE) $(DISPATCHEXE)
 
 .PHONY: opti
-opti: CXXFLAGS += -O2
+opti: CXXFLAGS += -O3
 opti: all
+
+.PHONY: lto
+lto: CXXFLAGS += -flto
+lto: LDFLAGS += -flto
+lto: opti
 
 .PHONY: debug
 debug: CXXFLAGS += -Og
