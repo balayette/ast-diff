@@ -90,7 +90,7 @@ double dice(Tree *t1, Tree *t2, Mappings &M) {
 
 Tree *candidate(Tree *t1, Tree *T2, Mappings &M) {
   Tree *best = nullptr;
-  double bestSim = 0.0;
+  double bestSim = 0.5;
 
   T2->PreorderTraversal([&](Tree *c) {
     if (c->GetValue() != t1->GetValue())
