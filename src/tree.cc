@@ -83,7 +83,6 @@ size_t Tree::initTree(size_t depth, const Tree *parent) {
 size_t Tree::InitTree() {
   size_t node_count = 0;
   PostorderTraversal([&](Tree *t) {
-    t->idx_ = node_count++;
     t->left_desc_ = t->idx_;
     t->right_desc_ = t->idx_;
   });
@@ -192,5 +191,5 @@ void Tree::LoadLocation(const std::vector<std::string> &loc) {
 const std::string &Tree::GetLocationInfo() { return location_info_; }
 
 std::ostream &operator<<(std::ostream &os, const Tree &tree) {
-  return os << '"' << tree.tree_id_ << '-' << tree.idx_ << '"';
+  return os << '"' << tree.idx_ << '"';
 }
