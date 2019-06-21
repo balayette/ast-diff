@@ -2,6 +2,10 @@
 
 import json
 from graphviz import Graph
+import random
+
+def random_color():
+    return '#' + ("%0.6x" % random.randint(0, 16777215))
 
 
 class Page:
@@ -66,20 +70,12 @@ def file_graph(pairs):
 
 def pair_graphs(pairs):
     for idx, pair in enumerate(pairs):
-        G = Graph()
-        for match in pair["matches"]:
-            G.edge(match["file1"]["path"],
-                   match["file2"]["path"],
-                   label=match["similarity"])
-
-        G.render(f"out/pairs/{idx}.dot", format='svg')
+        if len(pair['matches']) == 0:
+            continue
 
         f = Page(f"out/pairs/{idx}.html")
         f.write("<div>")
         f.write(f"<h1>{pair['directory1']} | {pair['directory2']}</h1>")
-        f.write(
-            f'<a href="{idx}.dot.svg"><img src="{idx}.dot.svg" style="width: 100%"/></a>'
-        )
         f.write("</div>")
 
         f.write('<div>')
@@ -87,8 +83,8 @@ def pair_graphs(pairs):
         f.write(
             f'<tr><th>{pair["directory1"]}</th><th>{pair["directory2"]}</th></tr>'
         )
-        for match in pair["matches"]:
 
+        for match in pair["matches"]:
             path1 = match['file1']['path'].replace('.sexp', '')
             path2 = match['file2']['path'].replace('.sexp', '')
 
@@ -145,9 +141,6 @@ def pair_graphs(pairs):
 def index(pairs):
     f = Page("out/index.html")
 
-    f.write("<h1>Relation Graph</h1>")
-    f.write('<a href="relations.dot.svg"><img style="width: 100%" src="relations.dot.svg"/></a>')
-
     f.write("<h1>Pairs</h1>")
 
     f.write(
@@ -155,6 +148,9 @@ def index(pairs):
     )
 
     for idx, pair in enumerate(pairs):
+        if len(pair['matches']) == 0:
+            continue
+
         f.write("<tr>")
 
         f.write(f"<td>{pair['directory1']}</td>")
@@ -177,10 +173,7 @@ def main():
 
     pairs = sorted(pairs, key=lambda pair: -len(pair["matches"]))
 
-    relation_graph(pairs)
-    # file_graph(pairs)
     pair_graphs(pairs)
-
     index(pairs)
 
 
