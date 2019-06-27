@@ -95,7 +95,7 @@ void do_sexp(Directory *dir, char *cc_path) {
 
   std::string compile_path = std::string(cc_path);
   if (compile_path.find("compile_commands.json") == std::string::npos)
-      compile_path = compile_path + "/compile_commands.json";
+    compile_path = compile_path + "/compile_commands.json";
   std::ifstream f(compile_path);
   if (!f)
     return;
@@ -184,6 +184,7 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
 }
 
 std::ostream &dump_match(const Match &match, std::ostream &os) {
+  static unsigned match_id = 0;
   os << "{\n";
   os << "   \"file1\": {\n";
   os << "\"path\": \"" << match.file1->path << "\",";
@@ -197,7 +198,8 @@ std::ostream &dump_match(const Match &match, std::ostream &os) {
     os << "{\"file1loc\": \"" << match.mappings[j].first->GetLocationInfo()
        << "\",\n";
     os << "\"file2loc\": \"" << match.mappings[j].second->GetLocationInfo()
-       << "\"}\n";
+       << "\",\n";
+    os << "\"match_id\": " << match_id++ << "}\n";
     if (j != match.mappings.size() - 1)
       os << ",\n";
   }
