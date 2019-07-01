@@ -99,7 +99,7 @@ def pair_graphs(pairs):
 
         f = Page(f"out/pairs/{idx}.html")
         f.write("<div>")
-        f.write(f"<h1>{pair['directory1']} | {pair['directory2']}</h1>")
+        f.write(f"<h1>{pair['directory1']} | {pair['directory2']} | {pair['match_ratio']}</h1>")
         f.write("</div>")
 
         left = ""
@@ -178,7 +178,7 @@ def index(pairs):
     f.write("<h1>Pairs</h1>")
 
     f.write(
-        "<table><tr><th>Directory 1</th><th>Directory 2</th><th>Matching files</th><th>Details</th></tr>"
+        "<table><tr><th>Directory 1</th><th>Directory 2</th><th>Score</th><th>Details</th></tr>"
     )
 
     for idx, pair in enumerate(pairs):
@@ -189,7 +189,7 @@ def index(pairs):
 
         f.write(f"<td>{pair['directory1']}</td>")
         f.write(f"<td>{pair['directory2']}</td>")
-        f.write(f"<td>{len(pair['matches'])}</td>")
+        f.write(f"<td>{pair['match_ratio']}</td>")
         f.write(f'<td><a href="pairs/{idx}.html">Details</a></td>')
 
         f.write("</tr>")
@@ -205,7 +205,7 @@ def main():
     with open("pairs.json", "r") as f:
         pairs = json.load(f)
 
-    pairs = sorted(pairs, key=lambda pair: -len(pair["matches"]))
+    pairs = sorted(pairs, key=lambda pair: -pair["match_ratio"])
 
     pair_graphs(pairs)
     index(pairs)

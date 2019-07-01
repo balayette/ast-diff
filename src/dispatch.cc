@@ -53,6 +53,7 @@ struct Pair {
   std::vector<Match> matches;
   Directory *directory1;
   Directory *directory2;
+  float match_ratio;
 };
 
 std::regex *glob = nullptr;
@@ -153,6 +154,8 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
   pair->directory1 = d1;
   pair->directory2 = d2;
 
+  unsigned file_count = 0;
+  double totalSim = 0.0;
   for (size_t i = 0; i < d1->sexps.size(); i++) {
     for (size_t j = 0; j < d2->sexps.size(); j++) {
       const std::string &p1 = d1->sexps[i].path;
@@ -176,10 +179,18 @@ void do_diff(Pair *pair, Directory *d1, Directory *d2) {
       if (s < sim)
         continue;
 
+      totalSim += s;
+      file_count++;
+
       pair->matches.emplace_back(&d1->sexps[i], &d2->sexps[j], s,
                                  MappingsVec2(t1, mapping));
     }
   }
+
+  if (file_count == 0)
+    pair->match_ratio = 0.0;
+  else
+    pair->match_ratio = totalSim / file_count;
 }
 
 std::ostream &dump_match(const Match &match, std::ostream &os) {
@@ -219,6 +230,7 @@ void dump_pairs(const std::vector<Pair> &pairs) {
 
     f << "\"directory1\": \"" << pair.directory1->cc_path << "\",";
     f << "\"directory2\": \"" << pair.directory2->cc_path << "\",";
+    f << "\"match_ratio\": " << pair.match_ratio << ",";
     f << "\"matches\": [";
     for (size_t i = 0; i < pair.matches.size(); i++) {
       dump_match(pair.matches[i], f);
