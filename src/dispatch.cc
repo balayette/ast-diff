@@ -100,7 +100,6 @@ void do_sexp(Directory *dir, char *cc_path) {
   if (!f)
     return;
 
-  std::cout << "opening " << compile_path << '\n';
   json cc;
   f >> cc;
 
@@ -267,13 +266,14 @@ void run(char *ccs[], int count) {
     results[i] =
         pool.push([=, &directories](int) { do_sexp(&directories[i], ccs[i]); });
 
+  std::cout << "Generating s-expressions...\n";
   for (int i = 0; i < count; i++) {
     results[i].get();
     std::cout << (int)(((i + 1) / (float)count) * 100) << "%\r";
     std::flush(std::cout);
   }
+  std::cout << "\nDone.\n";
 
-  std::cout << std::endl;
   int combinations_nbr = ncr(count, 2);
   pool.resize(std::min(jobs, combinations_nbr));
   std::cout << combinations_nbr << " combinations.\n";
