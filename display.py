@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import json
 import html
 from graphviz import Graph
@@ -107,6 +108,9 @@ def pair_graphs(pairs):
         for match in pair["matches"]:
             path1 = match["file1"]["path"].replace(".sexp", "")
             path2 = match["file2"]["path"].replace(".sexp", "")
+
+            left += f"<div class='row' style='border: 1px solid black'><h3>{os.path.basename(path1)}</h3></div>"
+            right += f"<div class='row' style='border: 1px solid black'><h3>{os.path.basename(path2)}</h3></div>"
 
             with open(path1, "r") as source1, open(path2, "r") as source2:
                 lines1 = list(map(lambda x: html.escape(x), source1.readlines()))
