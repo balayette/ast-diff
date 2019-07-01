@@ -128,7 +128,7 @@ void do_sexp(Directory *dir, char *cc_path) {
 
       std::string cmd(sexp);
 
-      cmd.append(" -p ")
+      cmd.append(" -extra-arg='-Wno-error' -p ")
           .append(cc_path)
           .append(" ")
           .append(path)
