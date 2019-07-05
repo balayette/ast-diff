@@ -94,6 +94,8 @@ def file_graph(pairs):
 
 def pair_graphs(pairs):
     for idx, pair in enumerate(pairs):
+        pair["lines_matched"] = 0
+        pair["pair_id"] = idx
         if len(pair["matches"]) == 0:
             continue
 
@@ -104,6 +106,8 @@ def pair_graphs(pairs):
 
         left = ""
         right = ""
+
+        lines = 0
 
         for match in pair["matches"]:
             path1 = match["file1"]["path"].replace(".sexp", "")
@@ -147,6 +151,8 @@ def pair_graphs(pairs):
                     e1 = int(e1)
                     e2 = int(e2)
 
+                    lines += e1 - b1 + b2 - b2
+
                     if b1 > prev1 or b2 > prev2:
                         if b1 > prev1:
                             text = "".join(lines1[prev1:b1 - 1])
@@ -160,6 +166,8 @@ def pair_graphs(pairs):
 
                     prev1 = e1
                     prev2 = e2
+            
+        pair["lines_matched"] = lines
 
         f.write("<div class='row'>")
         f.write("<div class='col' style='overflow-y: scroll; height:900px'>")
@@ -181,7 +189,7 @@ def index(pairs):
         "<table><tr><th>Directory 1</th><th>Directory 2</th><th>Score</th><th>Details</th></tr>"
     )
 
-    for idx, pair in enumerate(pairs):
+    for pair in pairs:
         if len(pair["matches"]) == 0:
             continue
 
@@ -189,8 +197,8 @@ def index(pairs):
 
         f.write(f"<td>{pair['directory1']}</td>")
         f.write(f"<td>{pair['directory2']}</td>")
-        f.write(f"<td>{pair['match_ratio']}</td>")
-        f.write(f'<td><a href="pairs/{idx}.html">Details</a></td>')
+        f.write(f"<td>{pair['lines_matched']}</td>")
+        f.write(f'<td><a href="pairs/{pair["pair_id"]}.html">Details</a></td>')
 
         f.write("</tr>")
 
@@ -205,10 +213,8 @@ def main():
     with open("pairs.json", "r") as f:
         pairs = json.load(f)
 
-    pairs = sorted(pairs, key=lambda pair: -pair["match_ratio"])
-
     pair_graphs(pairs)
-    index(pairs)
+    index(sorted(pairs, key=lambda pair: -pair["lines_matched"]))
 
 
 if __name__ == "__main__":
