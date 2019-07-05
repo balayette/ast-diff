@@ -116,9 +116,6 @@ def pair_graphs(pairs):
                 lines1 = list(map(lambda x: html.escape(x), source1.readlines()))
                 lines2 = list(map(lambda x: html.escape(x), source2.readlines()))
 
-                prev1 = 0
-                prev2 = 0
-
                 for loc in match["locations"]:
                     if "Spelling" in loc["file1loc"] or "Spelling" in loc["file2loc"]:
                         print(loc["file1loc"])
@@ -149,16 +146,17 @@ def pair_graphs(pairs):
 
                     lines += e1 - b1 + b2 - b2
 
-                    if b1 > prev1 or b2 > prev2:
-                        if b1 > prev1:
-                            text = "".join(lines1[prev1:b1 - 1])
-                            left += f'<pre class="row codefragment" style="color:black">{text}</pre>'
-                        if b2 > prev2:
-                            text = "".join(lines2[prev2:b2 - 1])
-                            right += f'<pre class="row codefragment" style="color:black">{text}</pre>'
+                    left += f'<pre class="row codefragment" style="color:black">{"".join(lines1[max(0, b1 - 3):b1-1])}</pre>'
+                    right += f'<pre class="row codefragment" style="color:black">{"".join(lines2[max(0, b2 - 3):b2-1])}</pre>'
 
-                    left += f'<pre class="row codefragment" style="color:{color}">{"".join(lines1[b1 - 1:e1])}</pre>'
-                    right += f'<pre class="row codefragment" style="color:{color}">{"".join(lines2[b2 - 1:e2])}</pre>'
+                    left += f'<pre class="row codefragment" style="color:{color}">{"".join(lines1[b1-1:e1])}</pre>'
+                    right += f'<pre class="row codefragment" style="color:{color}">{"".join(lines2[b2-1:e2])}</pre>'
+
+                    left += f'<pre class="row codefragment" style="color:black">{"".join(lines1[e1:min(e1 + 1, len(lines1))])}'
+                    right += f'<pre class="row codefragment" style="color:black">{"".join(lines2[e2:min(e2 + 1, len(lines2))])}'
+
+                    left += "...</pre>";
+                    right += "...</pre>"
 
                     prev1 = e1
                     prev2 = e2
