@@ -51,10 +51,6 @@ class Page:
             f.write('}')
             f.write("}\n")
 
-            f.write("th, td {\n")
-            f.write(" border: 1px solid black;\n")
-            f.write("}\n")
-
             f.write("table {\n")
             f.write(" border-collapse: collapse;\n")
             f.write(" width: 100%;\n")
@@ -186,7 +182,7 @@ def index(pairs):
     f.write("<h1>Pairs</h1>")
 
     f.write(
-        "<table><tr><th>Directory 1</th><th>Directory 2</th><th>Score</th><th>Details</th></tr>"
+        "<table class='table table-hover table-bordered'><tr><th>Directory 1</th><th>Directory 2</th><th>Matching lines</th><th>Details</th></tr>"
     )
 
     for pair in pairs:
